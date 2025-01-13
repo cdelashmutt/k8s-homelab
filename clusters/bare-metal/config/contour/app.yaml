@@ -27,8 +27,18 @@ spec:
   template:
     - ytt:
         strict: true
+        inline:
+          paths: 
+            envoy-service-overlay.yaml: |
+              #@ load("@ytt:overlay", "overlay")
+              #@overlay/match by=overlay.subset({"kind": "Service", "metadata":{"name":"envoy"}})
+              ---
+              spec:
+                #@overlay/match missing_ok=True
+                loadBalancerIP: 192.168.0.50
         paths:
-        - gateway/00-crds.yaml
-       # - contour/
+        - envoy-service-overlay.yaml
+        - gateway/
+        - contour/
   deploy:
     - kapp: {}
