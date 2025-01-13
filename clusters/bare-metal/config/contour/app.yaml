@@ -30,7 +30,7 @@ spec:
             overlays/contour-config.yaml: |
               #@ load("@ytt:overlay", "overlay")
               #@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata":{"name":"contour"}})
-              --
+              ---
               data:
                 contour.yaml: |
                   gateway:
