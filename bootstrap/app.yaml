@@ -38,7 +38,7 @@ spec:
   syncPeriod: 2m
   fetch:
     - git:
-        url: https://github.com/cdelashmutt/homelab-k8s
+        url: https://github.com/cdelashmutt/k8s-homelab
         ref: origin/main
         lfsSkipSmudge: true
         subPath: #@ "clusters/{}".format(data.values.clustername)
