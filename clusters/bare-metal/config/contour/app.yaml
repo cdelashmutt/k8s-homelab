@@ -12,7 +12,7 @@ spec:
   fetch:
     - git:
         url: https://github.com/projectcontour/contour
-        ref: origin/main
+        ref: origin/v1.30.2
         lfsSkipSmudge: true
         subPath: examples
     - inline:
@@ -28,7 +28,7 @@ spec:
     - ytt:
         strict: true
         paths:
-        - gateway/
-        - contour/
+        - gateway/00-crds.yaml
+       # - contour/
   deploy:
     - kapp: {}
