@@ -28,7 +28,6 @@ spec:
     - ytt:
         strict: true
         paths:
-        - namespace.yaml
         - gateway
         - contour
   deploy:
