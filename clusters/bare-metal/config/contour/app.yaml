@@ -27,8 +27,20 @@ spec:
               spec:
                 #@overlay/match missing_ok=True
                 loadBalancerIP: 192.168.0.50
+            overlays/contour-config.yaml: |
+              #@ load("@ytt:overlay", "overlay")
+              #@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata":{"name":"contour"}})
+              --
+              data:
+                contour.yaml: |
+                  gateway:
+                    gatewayRef:
+                      name: contour
+                      namespace: projectcontour
         paths:
-        - gateway/
+        - gateway/00-crds.yaml
+        - gateway/01-gatewayclass.yaml
+        - gateway/02-gateway.yaml
         - contour/
   deploy:
     - kapp: {}
