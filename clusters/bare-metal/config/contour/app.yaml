@@ -29,7 +29,7 @@ spec:
         strict: true
         inline:
           paths: 
-            envoy-service-overlay.yaml: |
+            overlays/envoy-service-overlay.yaml: |
               #@ load("@ytt:overlay", "overlay")
               #@overlay/match by=overlay.subset({"kind": "Service", "metadata":{"name":"envoy"}})
               ---
@@ -37,6 +37,7 @@ spec:
                 #@overlay/match missing_ok=True
                 loadBalancerIP: 192.168.0.50
         paths:
+        - overlays/
         - gateway/
         - contour/
   deploy:
