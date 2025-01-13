@@ -48,11 +48,11 @@ spec:
           privateKeysSecretRef:
             name: age-secrets
         paths:
-        - values/secret-values.sops.yml
+        - values/secret-values.sops.yaml
     - ytt:
         ignoreUnknownComments: true
         strict: true
         valuesFrom:
-          - path: values/non-secret-values.yml
+          - path: values/non-secret-values.yaml
   deploy:
     - kapp: {}
