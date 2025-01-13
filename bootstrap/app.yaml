@@ -1,0 +1,58 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bootstrap
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: bootstrap-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: bootstrap-cluster-admin
+  annotations:
+    kapp.k14s.io/change-group: bootstrap-role-binding
+    kapp.k14s.io/change-rule.0: "upsert after upserting bootstrap-sa"
+    kapp.k14s.io/change-rule.1: "delete before deleting bootstrap-sa"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: bootstrap
+  namespace: bootstrap
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: bootstrap
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-rule.0: "upsert after upserting bootstrap-role-binding"
+    kapp.k14s.io/change-rule.1: "delete before deleting bootstrap-role-binding"
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 2m
+  fetch:
+    - git:
+        url: https://github.com/cdelashmutt/homelab-k8s
+        ref: origin/main
+        lfsSkipSmudge: true
+        subPath: #@ "clusters/{}".format(data.values.clustername)
+  template:
+    - sops:
+        age:
+          privateKeysSecretRef:
+            name: age-secrets
+        paths:
+        - values/secret-values.sops.yml
+    - ytt:
+        ignoreUnknownComments: true
+        strict: true
+        valuesFrom:
+          - path: values/non-secret-values.yml
+  deploy:
+    - kapp: {}

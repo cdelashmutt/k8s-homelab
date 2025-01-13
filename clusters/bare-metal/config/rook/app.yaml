@@ -1,0 +1,26 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: rook
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: rook-operator
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 2m
+  fetch:
+    - git:
+        url: https://github.com/rook/rook
+        ref: origin/release-1.16
+        lfsSkipSmudge: true
+        subPath: deploy/examples
+  template:
+    - ytt:
+        strict: true
+        paths:
+        - crds.yaml
+        - common.yaml
+        - operator.yaml
+  deploy:
+    - kapp: {}

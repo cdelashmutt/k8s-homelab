@@ -1,0 +1,35 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: gateway-api
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: gateway-api
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+    - git:
+        url: https://github.com/projectcontour/contour
+        ref: origin/v1.30.2
+        lfsSkipSmudge: true
+        subPath: examples
+    - inline:
+        paths: 
+          envoy-service-overlay.yaml: |
+            #@ load("@ytt:overlay", "overlay")
+            #@overlay/match by=overlay.subset({"kind": "Service", "metadata":{"name":"envoy"}})
+            ---
+            spec:
+              #@overlay/match missing_ok=True
+              loadBalancerIP: 192.168.0.50
+  template:
+    - ytt:
+        strict: true
+        paths:
+        - namespace.yaml
+        - gateway
+        - contour
+  deploy:
+    - kapp: {}

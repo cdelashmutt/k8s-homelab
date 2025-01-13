@@ -1,0 +1,12 @@
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: default-pool
+  namespace: metallb-system
+  annotations:
+    kapp.k14s.io/change-rule.0: "upsert after upserting metallb"
+    kapp.k14s.io/change-rule.1: "delete before deleting metallb"
+spec:
+  addresses:
+  - 192.168.0.50-192.168.0.60
