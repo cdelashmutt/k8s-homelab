@@ -28,7 +28,7 @@ spec:
     - ytt:
         strict: true
         paths:
-        - gateway
-        - contour
+        - examples/gateway
+        - examples/contour
   deploy:
     - kapp: {}
