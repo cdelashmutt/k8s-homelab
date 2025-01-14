@@ -1,5 +1,15 @@
 ---
 apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: example
+  namespace: metallb-system
+  annotations:
+    kapp.k14s.io/change-group: metallb-ippool
+    kapp.k14s.io/change-rule.0: "upsert after upserting metallb"
+    kapp.k14s.io/change-rule.1: "delete before deleting metallb"
+---
+apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
   name: default-pool
