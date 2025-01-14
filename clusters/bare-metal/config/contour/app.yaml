@@ -6,6 +6,9 @@ metadata:
   namespace: bootstrap
   annotations:
     kapp.k14s.io/change-group: gateway-api
+    kapp.k14s.io/change-rule.0: "upsert after upserting metallb-ippool"
+    kapp.k14s.io/change-rule.1: "delete before deleting metallb-ippool"
+
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
