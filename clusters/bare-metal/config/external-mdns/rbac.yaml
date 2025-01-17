@@ -28,4 +28,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: external-mdns
-  namespace: default
+  namespace: external-mdns
