@@ -11,13 +11,6 @@ spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
   fetch:
-  - inline:
-      paths:
-        inline/namespace.yaml: |
-          apiVersion: v1
-          kind: Namespace
-          metadata:
-            name: harbor
   - helmChart:
       name: harbor
       version: 1.16.1
@@ -29,5 +22,13 @@ spec:
       valuesFrom:
       - secretRef:
           name: harbor-values
+  - ytt:
+      inline:
+        paths:
+          namespace.yaml: |
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: harbor
   deploy:
   - kapp: {}
