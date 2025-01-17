@@ -11,6 +11,13 @@ spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
   fetch:
+  - inline:
+      paths:
+        namespace.yaml: |
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: harbor
   - helmChart:
       name: harbor
       version: 1.16.1
@@ -18,6 +25,7 @@ spec:
         url: https://helm.goharbor.io
   template:
   - helmTemplate:
+      namespace: harbor
       valuesFrom:
       - secretRef:
           name: harbor-values
