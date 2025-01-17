@@ -29,7 +29,7 @@ spec:
               ---
               annotations:
                 #@overlay/match missing_ok=True
-                external-dns.alpha.kubernetes.io/hostname: *.home.grogscave.net
+                external-dns.alpha.kubernetes.io/hostname: "*.home.grogscave.net"
               spec:
                 #@overlay/match missing_ok=True
                 loadBalancerIP: 192.168.0.50
