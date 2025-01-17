@@ -54,5 +54,6 @@ spec:
         strict: true
         valuesFrom:
           - path: values/non-secret-values.yaml
+          - path: values/secret-values.yaml
   deploy:
     - kapp: {}
