@@ -52,6 +52,7 @@ spec:
                 commonName: home.grogscave.net
                 dnsNames:
                   - "*.home.grogscave.net"
+                  - "home.grogscave.net"
                 issuerRef:
                   name: letsencrypt-cluster-issuer
                   kind: ClusterIssuer
