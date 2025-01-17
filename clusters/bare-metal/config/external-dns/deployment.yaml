@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-dns
+  namespace: external-dns
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: external-dns
+  template:
+    metadata:
+      labels:
+        app: external-dns
+    spec:
+      serviceAccountName: external-dns
+      nodeSelector:
+        node-role.kubernetes.io/control-plane:
+      tolerations:
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
+      containers:
+      - name: external-dns
+        image: registry.k8s.io/external-dns/external-dns:v0.15.1
+        args:
+        - --source=service # or ingress or both
+        - --source=ingress
+        - --domain-filter=home.grogscave.net
+        - --service-type-filter=LoadBalancer # this will only create dns entries for serviecs of type LoadBalancer
+        - --provider=aws
+        - --policy=upsert-only
+        - --aws-zone-type=public
+        - --registry=txt
+        - --txt-owner-id=bare-metal
+        - --log-level=info
+        env:
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
+            - name: AWS_SHARED_CREDENTIALS_FILE
+              value: /.aws/credentials
+        volumeMounts:
+            - name: aws-credentials
+              mountPath: /.aws
+              readOnly: true
+        volumes:
+        - name: aws-credentials
+          secret:
+            secretName: aws-credentials
