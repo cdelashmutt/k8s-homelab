@@ -13,7 +13,7 @@ spec:
   fetch:
   - inline:
       paths:
-        namespace.yaml: |
+        inline/namespace.yaml: |
           apiVersion: v1
           kind: Namespace
           metadata:
