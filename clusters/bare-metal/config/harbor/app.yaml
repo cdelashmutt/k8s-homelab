@@ -1,0 +1,27 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: harbor
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-rule.0: "upsert after upserting contour"
+    kapp.k14s.io/change-rule.1: "delete before deleting contour"
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - helmChart:
+      name: harbor
+      version: 1.16.1
+      repository:
+        url: https://helm.goharbor.io
+  template:
+  - helmTemplate:
+    valuesFrom:
+    - secretRef:
+        name: harbor-values
+    - secretRef:
+        name: harbor-secret-values
+  deploy:
+  - kapp: {}

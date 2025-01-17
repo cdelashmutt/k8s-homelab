@@ -5,9 +5,9 @@ metadata:
   name: gateway-api
   namespace: bootstrap
   annotations:
-    kapp.k14s.io/change-group: gateway-api
-    kapp.k14s.io/change-rule.0: "upsert after upserting metallb-ippool"
-    kapp.k14s.io/change-rule.1: "delete before deleting metallb-ippool"
+    kapp.k14s.io/change-group: contour
+    kapp.k14s.io/change-rule.0: "upsert after upserting external-mdns"
+    kapp.k14s.io/change-rule.1: "delete before deleting external-mdns"
 
 spec:
   serviceAccountName: bootstrap
