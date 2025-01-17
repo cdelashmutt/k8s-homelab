@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: external-dns
   namespace: external-dns
+  annotations:
+    kapp.k14s.io/change-group: external-dns
 spec:
   strategy:
     type: Recreate

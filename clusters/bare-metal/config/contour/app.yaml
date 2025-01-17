@@ -6,8 +6,12 @@ metadata:
   namespace: bootstrap
   annotations:
     kapp.k14s.io/change-group: contour
-    kapp.k14s.io/change-rule.0: "upsert after upserting external-mdns"
-    kapp.k14s.io/change-rule.1: "delete before deleting external-mdns"
+    kapp.k14s.io/change-rule.0: "upsert after upserting cert-manager"
+    kapp.k14s.io/change-rule.1: "delete before deleting cert-manager"
+    kapp.k14s.io/change-rule.2: "upsert after upserting metal-lb"
+    kapp.k14s.io/change-rule.3: "delete before deleting metal-lb"
+    kapp.k14s.io/change-rule.4: "upsert after upserting external-dns"
+    kapp.k14s.io/change-rule.5: "delete before deleting external-dns"
 
 spec:
   serviceAccountName: bootstrap
@@ -34,6 +38,32 @@ spec:
               spec:
                 #@overlay/match missing_ok=True
                 loadBalancerIP: 192.168.0.50
+            overlays/certs.yaml: |
+              ---
+              apiVersion: cert-manager.io/v1
+              kind: Certificate
+              metadata:
+                name: wildcard-home-grogscave-net
+                namespace: projectcontour
+              spec:
+                secretName: wildcard-tls
+                privateKey:
+                  rotationPolicy: Always
+                commonName: home.grogscave.net
+                dnsNames:
+                  - "*.home.grogscave.net"
+                issuerRef:
+                  name: letsencrypt-cluster-issuer
+                  kind: ClusterIssuer
+              ---
+              apiVersion: secretgen.carvel.dev/v1alpha1
+              kind: SecretExport
+              metadata:
+                name: wildcard-home-grogscave-net
+                namespace: projectcontour
+              spec:
+                toNamespaces:
+                - harbor
             # overlays/contour-config.yaml: |
             #   #@ load("@ytt:overlay", "overlay")
             #   #@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata":{"name":"contour"}})

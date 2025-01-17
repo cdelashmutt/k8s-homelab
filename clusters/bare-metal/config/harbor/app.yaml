@@ -26,9 +26,19 @@ spec:
       inline:
         paths:
           namespace.yaml: |
+            ---
             apiVersion: v1
             kind: Namespace
             metadata:
               name: harbor
+          secretimport.yaml: |
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: wildcard-home-grogscave-net
+              namespace: harbor
+            spec:
+              fromNamespace: projectcontour
   deploy:
   - kapp: {}
