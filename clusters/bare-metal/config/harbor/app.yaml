@@ -18,8 +18,8 @@ spec:
         url: https://helm.goharbor.io
   template:
   - helmTemplate:
-    valuesFrom:
-    - secretRef:
-        name: harbor-values
+      valuesFrom:
+      - secretRef:
+          name: harbor-values
   deploy:
   - kapp: {}
