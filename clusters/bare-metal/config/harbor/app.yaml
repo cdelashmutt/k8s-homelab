@@ -21,7 +21,5 @@ spec:
     valuesFrom:
     - secretRef:
         name: harbor-values
-    - secretRef:
-        name: harbor-secret-values
   deploy:
   - kapp: {}
