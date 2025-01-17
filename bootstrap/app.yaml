@@ -52,6 +52,8 @@ spec:
     - ytt:
         ignoreUnknownComments: true
         strict: true
+        paths: 
+        - config
         valuesFrom:
           - path: values/non-secret-values.yaml
           - path: values/secret-values.yaml
