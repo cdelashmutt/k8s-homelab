@@ -36,7 +36,7 @@ spec:
             apiVersion: secretgen.carvel.dev/v1alpha1
             kind: SecretImport
             metadata:
-              name: wildcard-home-grogscave-net
+              name: wildcard-tls
               namespace: harbor
             spec:
               fromNamespace: projectcontour
