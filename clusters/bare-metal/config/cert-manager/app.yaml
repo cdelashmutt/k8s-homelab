@@ -1,0 +1,52 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: cert-manager
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: cert-manager
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+    - http:
+        url: https://github.com/cert-manager/cert-manager/releases/download/v1.16.3/cert-manager.yaml
+  template:
+    - ytt:
+        strict: true
+        inline:
+          paths: 
+            #@yaml/text-templated-strings
+            overlays/lets-encrypt.yaml: |
+              ---
+              apiVersion: v1
+              stringData:
+                secret-access-key: (@= data.values.certmanager.aws.credentials.secretKey @)
+              kind: Secret
+              metadata:
+                name: prod-route53-credentials-secret
+                namespace: cert-manager
+              ---
+              apiVersion: cert-manager.io/v1
+              kind: ClusterIssuer
+              metadata:
+                name: letsencrypt-cluster-issuer
+              spec:
+                acme:
+                  email: (@= data.values.certmanager.acme.email @) 
+                  privateKeySecretRef:
+                    name: acme-account-key
+                  server: https://acme-v02.api.letsencrypt.org/directory
+                  solvers:
+                    - dns01:
+                        route53:
+                          region: (@= data.values.certmanager.aws.region @)
+                          accessKeyID: (@= data.values.certmanager.aws.credentials.accessKey @)
+                          secretAccessKeySecretRef:
+                            name: prod-route53-credentials-secret
+                            key: secret-access-key
+                          hostedZoneID: (@= data.values.certmanager.aws.zoneId @)
+  deploy:
+    - kapp: {}
