@@ -19,7 +19,6 @@ spec:
         url: https://charts.blue-atlas.de
   template:
   - helmTemplate:
-      path: librechat
       namespace: librechat
       valuesFrom:
       - secretRef:
