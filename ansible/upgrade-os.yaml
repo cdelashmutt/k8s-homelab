@@ -1,0 +1,127 @@
+---
+- name: Rolling upgrade Ubuntu OS on Kubernetes nodes
+  hosts: k8s
+  serial: 1
+  gather_facts: true
+  become: true
+
+  collections:
+    - kubernetes.core
+
+  vars:
+    # How long to wait (seconds) for SSH to come back after reboot
+    ssh_wait_timeout: 600
+
+    # Number of retries & delay for waiting until the node is Ready again
+    kube_wait_retries: 30
+    kube_wait_delay: 10
+
+  tasks:
+
+    - name: Cordon this Kubernetes node
+      delegate_to: localhost
+      become: false
+      kubernetes.core.k8s_drain:
+        name: "{{ ansible_hostname }}"
+        state: cordon
+
+#    - name: Wait for Rook Ceph Mon Containers
+#      delegate_to: localhost
+#      become: false
+#      kubernetes.core.k8s_info:
+#        kind: Pod
+#        namespace: "rook-ceph"
+#        label_selectors:
+#          - "app=rook-ceph-mon"
+#      register: pod_list
+#      until: >
+#        ( pod_list.resources
+#          | json_query("[?status.conditions[?(@.type=='Ready' && @.status=='True')]]")
+#          | length
+#        ) >= 3
+#      retries: "30"
+#      delay: "10"
+#      failed_when: >
+#        ( pod_list.resources
+#          | json_query("[?status.conditions[?(@.type=='Ready' && @.status=='True')]]")
+#          | length
+#        ) < 3
+#
+#    - name: Wait for Rook Ceph OSD Containers
+#      delegate_to: localhost
+#      become: false
+#      kubernetes.core.k8s_info:
+#        kind: Pod
+#        namespace: "rook-ceph"
+#        label_selectors:
+#          - "app=rook-ceph-osd"
+#      register: pod_list
+#      until: >
+#        ( pod_list.resources
+#          | json_query("[?status.conditions[?(@.type=='Ready' && @.status=='True')]]")
+#          | length
+#        ) >= 3
+#      retries: "30"
+#      delay: "10"
+#      failed_when: >
+#        ( pod_list.resources
+#          | json_query("[?status.conditions[?(@.type=='Ready' && @.status=='True')]]")
+#          | length
+#        ) < 3
+
+    - name: Drain this Kubernetes node
+      delegate_to: localhost
+      become: false
+      kubernetes.core.k8s_drain:
+        name: "{{ ansible_hostname }}"
+        delete_options:
+          ignore_daemonsets: true
+          delete_emptydir_data: true
+          force: true
+          disable_eviction: true
+          wait_timeout: 5
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install all available upgrades (including kernel if any)
+      apt:
+        upgrade: dist
+        autoclean: yes
+        autoremove: yes
+
+    - name: Reboot the node
+      reboot:
+        reboot_timeout: 600
+
+    - name: Wait for SSH to be available again
+      wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: 22
+        timeout: "{{ ssh_wait_timeout }}"
+
+    - name: Pause briefly to let Ubuntu come fully up (optional 30s)
+      pause:
+        seconds: 30
+
+    - name: Wait until this node is Ready in Kubernetes
+      delegate_to: localhost
+      become: false
+      register: node_info
+      retries: "{{ kube_wait_retries }}"
+      delay: "{{ kube_wait_delay }}"
+      until: >
+        node_info.resources[0].status.conditions
+        | selectattr('type', 'equalto', 'Ready')
+        | selectattr('status', 'equalto', 'True') | list | length > 0
+      kubernetes.core.k8s_info:
+        kind: Node
+        name: "{{ ansible_hostname }}"
+
+    - name: Uncordon this Kubernetes node
+      delegate_to: localhost
+      become: false
+      kubernetes.core.k8s_drain:
+        name: "{{ ansible_hostname }}"
+        state: uncordon

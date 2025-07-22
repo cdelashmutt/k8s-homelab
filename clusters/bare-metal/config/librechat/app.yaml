@@ -1,0 +1,58 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: librechat
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-rule.0: "upsert after upserting contour"
+    kapp.k14s.io/change-rule.1: "delete before deleting contour"
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - git:
+      url: https://github.com/danny-avila/LibreChat
+      ref: v0.7.9-rc1
+      subPath: helm/librechat
+  template:
+  - helmTemplate:
+      namespace: librechat
+      valuesFrom:
+      - secretRef:
+          name: librechat-values
+  - ytt:
+      inline:
+        paths:
+          namespace.yaml: |
+            ---
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: librechat
+          secretimport.yaml: |
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: wildcard-tls
+              namespace: librechat
+            spec:
+              fromNamespace: projectcontour
+          #@yaml/text-templated-strings
+          librechat-credentials-env.yaml: |
+            ---
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: librechat-credentials-env
+              namespace: librechat
+            type: Opaque
+            stringData:
+              CREDS_KEY: (@= data.values.librechat.credsKey @)
+              JWT_SECRET: (@= data.values.librechat.jwtSecret @)
+              JWT_REFRESH_SECRET: (@= data.values.librechat.jwtRefreshSecret @)
+              MEILI_MASTER_KEY: (@= data.values.librechat.meiliMasterKey @)
+
+  deploy:
+  - kapp: {}
