@@ -12,10 +12,11 @@ spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
   fetch:
-  - git:
-      url: https://github.com/danny-avila/LibreChat
-      ref: v0.7.9-rc1
-      subPath: helm
+  - helmChart:
+      url: https://charts.blue-atlas.de
+      name: librechat/librechat
+      version: 1.8.10
+      fetchTimeout: 5m
   template:
   - helmTemplate:
       path: librechat
