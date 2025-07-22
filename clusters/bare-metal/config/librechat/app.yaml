@@ -57,4 +57,5 @@ spec:
               MEILI_MASTER_KEY: (@= data.values.librechat.env.meiliMasterKey @)
 
   deploy:
-  - kapp: {}
+  - kapp: 
+      intoNs: librechat
