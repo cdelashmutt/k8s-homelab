@@ -65,6 +65,8 @@ spec:
               spec:
                 toNamespaces:
                 - harbor
+                - rook-ceph
+                - librechat
             # overlays/contour-config.yaml: |
             #   #@ load("@ytt:overlay", "overlay")
             #   #@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata":{"name":"contour"}})
