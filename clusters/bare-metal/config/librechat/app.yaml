@@ -13,10 +13,10 @@ spec:
   syncPeriod: 10m
   fetch:
   - helmChart:
-      url: https://charts.blue-atlas.de
-      name: librechat/librechat
-      version: 1.8.10
-      fetchTimeout: 5m
+      name: librechat
+      version: "1.8.10"
+      repository:
+        url: https://charts.blue-atlas.de
   template:
   - helmTemplate:
       path: librechat
