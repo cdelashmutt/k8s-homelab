@@ -55,7 +55,11 @@ spec:
               JWT_SECRET: (@= data.values.librechat.env.jwtSecret @)
               JWT_REFRESH_SECRET: (@= data.values.librechat.env.jwtRefreshSecret @)
               MEILI_MASTER_KEY: (@= data.values.librechat.env.meiliMasterKey @)
-
+              ALLOW_EMAIL_LOGIN: "true"
+              ALLOW_REGISTRATION: "true"
+              SEARXNG_INSTANCE_URL: "https://search.inetol.net/"
+              FIRECRAWL_API_KEY: (@= data.values.librechat.env.firecrawlApiKey @)
+              COHERE_API_KEY: (@= data.values.librechat.env.cohereApiKey @)
   deploy:
   - kapp: 
       intoNs: librechat
