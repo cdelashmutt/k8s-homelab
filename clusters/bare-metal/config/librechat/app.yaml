@@ -50,10 +50,10 @@ spec:
               namespace: librechat
             type: Opaque
             stringData:
-              CREDS_KEY: (@= data.values.librechat.credsKey @)
-              JWT_SECRET: (@= data.values.librechat.jwtSecret @)
-              JWT_REFRESH_SECRET: (@= data.values.librechat.jwtRefreshSecret @)
-              MEILI_MASTER_KEY: (@= data.values.librechat.meiliMasterKey @)
+              CREDS_KEY: (@= data.values.librechat.env.credsKey @)
+              JWT_SECRET: (@= data.values.librechat.env.jwtSecret @)
+              JWT_REFRESH_SECRET: (@= data.values.librechat.env.jwtRefreshSecret @)
+              MEILI_MASTER_KEY: (@= data.values.librechat.env.meiliMasterKey @)
 
   deploy:
   - kapp: {}
