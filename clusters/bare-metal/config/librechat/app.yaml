@@ -27,14 +27,14 @@ spec:
       inline:
         paths:
           dev-image-overlay.yaml: |
-            @load("@ytt:overlay", "overlay")
-            @overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "librechat-librechat"}})
+            #@load("@ytt:overlay", "overlay")
+            #@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "librechat-librechat"}})
             ---
             spec:
               template:
                 spec:
                   containers:
-                  @overlay/match by=overlay.map_key("name")
+                  #@overlay/match by=overlay.map_key("name")
                     - name: librechat-librechat
                       image: ghcr.io/danny-avila/librechat-dev@sha256:5d0dcca7d2b1e6bdce75287ed6575bbd12b1ca5d835aa9f2fd1365ae6e95bcc8
           namespace.yaml: |
