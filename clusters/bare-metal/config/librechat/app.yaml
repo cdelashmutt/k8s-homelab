@@ -70,7 +70,7 @@ spec:
               ALLOW_REGISTRATION: "true"
               FIRECRAWL_API_KEY: (@= data.values.librechat.env.firecrawlApiKey @)
               COHERE_API_KEY: (@= data.values.librechat.env.cohereApiKey @)
-              SEARXNG_INSTANCE_URL: "http://searnxg:8888"
+              SEARXNG_INSTANCE_URL: "http://searxng:8888"
           searxng.yaml: |
             ---
             apiVersion: apps/v1
