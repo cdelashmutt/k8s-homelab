@@ -28,7 +28,7 @@ spec:
         paths:
           dev-image-overlay.yaml: |
             @load("@ytt:overlay", "overlay")
-            @overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "librechat"}})
+            @overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "librechat-librechat"}})
             ---
             spec:
               template:
