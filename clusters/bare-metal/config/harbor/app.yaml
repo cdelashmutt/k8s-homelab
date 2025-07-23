@@ -70,9 +70,9 @@ spec:
             spec:
               caRef:
                 name: token-ca-cert
-                secretTemplate:
-              stringData:
-                tls.crt: $(certificate)
-                tls.key: $(privateKey)
+              secretTemplate:
+                stringData:
+                  tls.crt: $(certificate)
+                  tls.key: $(privateKey)
   deploy:
   - kapp: {}
