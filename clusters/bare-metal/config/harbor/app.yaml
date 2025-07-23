@@ -46,6 +46,7 @@ spec:
             kind: Certificate
             metadata:
               name: token-ca-cert
+              namespace: harbor
             spec:
               isCA: true
             ---
@@ -53,6 +54,7 @@ spec:
             kind: Certificate
             metadata:
               name: token-cert
+              namespace: harbor
             spec:
               caRef:
                 name: token-ca-cert
