@@ -25,6 +25,14 @@ spec:
   - ytt:
       inline:
         paths:
+          changeconfig.yaml: |
+            apiVersion: kapp.k14s.io/v1alpha1
+            kind: Config
+            minimumRequiredVersion: 0.23.0
+            changeGroupBindings:
+            - name: harbor-core-changegroup
+              resourceMatchers:
+              - kindNamespaceNameMatcher: {kind: Deployment, namespace: harbor, name:harbor-core}
           namespace.yaml: |
             ---
             apiVersion: v1
@@ -47,6 +55,8 @@ spec:
             metadata:
               name: token-ca-cert
               namespace: harbor
+              annotations:
+                kapp.k14s.io/change-rule.0: "upsert before upserting harbor-core-changegroup"
             spec:
               isCA: true
             ---
@@ -55,6 +65,8 @@ spec:
             metadata:
               name: token-cert
               namespace: harbor
+              annotations:
+                kapp.k14s.io/change-rule.0: "upsert before upserting harbor-core-changegroup"
             spec:
               caRef:
                 name: token-ca-cert
