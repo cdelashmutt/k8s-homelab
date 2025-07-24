@@ -90,10 +90,6 @@ spec:
                   labels:
                     app: searxng
                 spec:
-                  ports:
-                  - port: 8080
-                    protocol: TCP
-                    name: app
                   containers:
                   - image: searxng/searxng
                     name: searxng
@@ -116,7 +112,6 @@ spec:
             spec:
               ports:
               - port: 8080
-                targetPort: app
               selector:
                 app: searxng
               type: ClusterIP
