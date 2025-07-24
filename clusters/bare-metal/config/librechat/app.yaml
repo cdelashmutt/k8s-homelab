@@ -100,6 +100,8 @@ spec:
                     volumeMounts:
                     - name: searxng-config
                       mountPath: /etc/searxng
+                    ports:
+                    - containerPort: 8080
                   volumes:
                   - name: searxng-config
                     configMap:
