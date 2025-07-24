@@ -69,6 +69,7 @@ spec:
               ALLOW_EMAIL_LOGIN: "true"
               ALLOW_REGISTRATION: "true"
               FIRECRAWL_API_KEY: (@= data.values.librechat.env.firecrawlApiKey @)
+              FIRECRAWL_API_URL: "https://api.firecrawl.dev"
               COHERE_API_KEY: (@= data.values.librechat.env.cohereApiKey @)
               SEARXNG_INSTANCE_URL: "http://searxng:8888"
           searxng.yaml: |
