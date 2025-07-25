@@ -72,6 +72,7 @@ spec:
               FIRECRAWL_API_URL: "https://api.firecrawl.dev"
               COHERE_API_KEY: (@= data.values.librechat.env.cohereApiKey @)
               SEARXNG_INSTANCE_URL: "http://searxng:8888"
+              SEARXNG_API_KEY: "searxng"
           searxng.yaml: |
             ---
             apiVersion: apps/v1
