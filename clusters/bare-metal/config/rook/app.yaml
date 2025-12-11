@@ -22,5 +22,6 @@ spec:
         - crds.yaml
         - common.yaml
         - operator.yaml
+        - csi-operator.yaml
   deploy:
     - kapp: {}
