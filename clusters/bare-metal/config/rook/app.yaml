@@ -12,7 +12,7 @@ spec:
   fetch:
     - git:
         url: https://github.com/rook/rook
-        ref: origin/release-1.16
+        ref: origin/release-1.17
         lfsSkipSmudge: true
         subPath: deploy/examples
   template:
