@@ -18,12 +18,6 @@ spec:
   - ytt:
       inline:
         paths:
-          namespace.yaml: |
-            ---
-            apiVersion: v1
-            kind: Namespace
-            metadata:
-              name: system-upgrade
           plans.yaml: |
             ---
             # Pinned to v1.32 minor channel — patch upgrades happen automatically.
