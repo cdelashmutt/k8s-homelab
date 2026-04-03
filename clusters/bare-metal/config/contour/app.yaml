@@ -49,7 +49,7 @@ spec:
               #@overlay/match by=overlay.subset({"kind": "RoleBinding", "metadata": {"name": "contour"}})
               #@overlay/remove
               ---
-              #@overlay/match by=lambda index, left, right: hasattr(left, "kind") and left.kind == "Job" and hasattr(left, "metadata") and left.metadata.name.startswith("contour-certgen")
+              #@overlay/match by=overlay.subset({"kind": "Job", "metadata": {"name": "contour-certgen-v1-33-3"}})
               #@overlay/remove
               ---
             overlays/certs.yaml: |
