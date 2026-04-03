@@ -1,0 +1,50 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: metallb
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: metallb
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - helmChart:
+      name: metallb
+      version: "0.14.9"
+      repository:
+        url: https://metallb.github.io/metallb
+  template:
+  - helmTemplate:
+      namespace: metallb-system
+  - ytt:
+      inline:
+        paths:
+          namespace.yaml: |
+            ---
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: metallb-system
+          config.yaml: |
+            ---
+            apiVersion: metallb.io/v1beta1
+            kind: IPAddressPool
+            metadata:
+              name: default-pool
+              namespace: metallb-system
+            spec:
+              addresses:
+              - 192.168.0.50-192.168.0.59
+            ---
+            apiVersion: metallb.io/v1beta1
+            kind: L2Advertisement
+            metadata:
+              name: default
+              namespace: metallb-system
+            spec:
+              ipAddressPools:
+              - default-pool
+  deploy:
+  - kapp: {}

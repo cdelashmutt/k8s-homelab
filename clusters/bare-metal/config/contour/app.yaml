@@ -8,8 +8,8 @@ metadata:
     kapp.k14s.io/change-group: contour
     kapp.k14s.io/change-rule.0: "upsert after upserting cert-manager"
     kapp.k14s.io/change-rule.1: "delete before deleting cert-manager"
-    kapp.k14s.io/change-rule.2: "upsert after upserting metal-lb"
-    kapp.k14s.io/change-rule.3: "delete before deleting metal-lb"
+    kapp.k14s.io/change-rule.2: "upsert after upserting metallb"
+    kapp.k14s.io/change-rule.3: "delete before deleting metallb"
     kapp.k14s.io/change-rule.4: "upsert after upserting external-dns"
     kapp.k14s.io/change-rule.5: "delete before deleting external-dns"
 
