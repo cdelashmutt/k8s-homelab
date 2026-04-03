@@ -6,13 +6,21 @@
 
   tasks:
 
-    - name: Install unattended-upgrades and apt-listchanges
+    - name: Install required packages
       apt:
         name:
           - unattended-upgrades
           - apt-listchanges
+          - nfs-common
+          - open-iscsi
         state: present
         update_cache: true
+
+    - name: Enable and start iscsid
+      systemd:
+        name: iscsid
+        enabled: true
+        state: started
 
     - name: Configure unattended-upgrades (security only, let kured handle reboots)
       copy:
