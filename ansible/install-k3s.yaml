@@ -16,8 +16,6 @@
           INSTALL_K3S_CHANNEL="{{ k3s_version }}" \
           sh -s - server \
             --cluster-init \
-            --disable=servicelb \
-            --tls-san 192.168.0.50 \
             --tls-san ubuntu1.home
       args:
         creates: /usr/local/bin/k3s
@@ -52,8 +50,7 @@
           K3S_TOKEN="{{ k3s_token }}" \
           INSTALL_K3S_CHANNEL="{{ k3s_version }}" \
           sh -s - server \
-            --server https://ubuntu1.home:6443 \
-            --disable=servicelb
+            --server https://ubuntu1.home:6443
       args:
         creates: /usr/local/bin/k3s
 

@@ -1,0 +1,13 @@
+---
+# Customize k3s's built-in Traefik deployment.
+# k3s manages Traefik via HelmChart; HelmChartConfig lets us override values.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    service:
+      annotations:
+        external-dns.alpha.kubernetes.io/hostname: "*.home.grogscave.net"
