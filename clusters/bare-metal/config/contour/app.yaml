@@ -46,7 +46,7 @@ spec:
               #@overlay/match by=overlay.subset({"kind": "Role", "metadata": {"name": "contour-certgen"}})
               #@overlay/remove
               ---
-              #@overlay/match by=overlay.subset({"kind": "RoleBinding", "metadata": {"name": "contour-certgen"}})
+              #@overlay/match by=overlay.subset({"kind": "RoleBinding", "metadata": {"name": "contour"}})
               #@overlay/remove
               ---
               #@overlay/match by=lambda index, left, right: left.kind == "Job" and left.metadata.name.startswith("contour-certgen"), expects="0+"
