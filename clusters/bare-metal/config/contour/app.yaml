@@ -19,7 +19,7 @@ spec:
   fetch:
     - git:
         url: https://github.com/projectcontour/contour
-        ref: origin/v1.30.2
+        ref: origin/v1.33.3
         lfsSkipSmudge: true
         subPath: examples
   template:
@@ -38,6 +38,20 @@ spec:
               spec:
                 #@overlay/match missing_ok=True
                 loadBalancerIP: 192.168.0.50
+            overlays/remove-certgen.yaml: |
+              #@ load("@ytt:overlay", "overlay")
+              #@overlay/match by=overlay.subset({"kind": "ServiceAccount", "metadata": {"name": "contour-certgen"}})
+              #@overlay/remove
+              ---
+              #@overlay/match by=overlay.subset({"kind": "ClusterRole", "metadata": {"name": "contour-certgen"}})
+              #@overlay/remove
+              ---
+              #@overlay/match by=overlay.subset({"kind": "ClusterRoleBinding", "metadata": {"name": "contour-certgen"}})
+              #@overlay/remove
+              ---
+              #@overlay/match by=overlay.subset({"kind": "Job", "metadata": {"name": "contour-certgen"}})
+              #@overlay/remove
+              ---
             overlays/certs.yaml: |
               ---
               apiVersion: cert-manager.io/v1
@@ -67,6 +81,77 @@ spec:
                 - harbor
                 - rook-ceph
                 - librechat
+              ---
+              apiVersion: cert-manager.io/v1
+              kind: Issuer
+              metadata:
+                name: contour-selfsigned-issuer
+                namespace: projectcontour
+              spec:
+                selfSigned: {}
+              ---
+              apiVersion: cert-manager.io/v1
+              kind: Certificate
+              metadata:
+                name: contour-ca
+                namespace: projectcontour
+              spec:
+                isCA: true
+                commonName: contour-ca
+                secretName: contour-ca
+                privateKey:
+                  algorithm: ECDSA
+                  size: 256
+                issuerRef:
+                  name: contour-selfsigned-issuer
+                  kind: Issuer
+              ---
+              apiVersion: cert-manager.io/v1
+              kind: Issuer
+              metadata:
+                name: contour-ca-issuer
+                namespace: projectcontour
+              spec:
+                ca:
+                  secretName: contour-ca
+              ---
+              apiVersion: cert-manager.io/v1
+              kind: Certificate
+              metadata:
+                name: contourcert
+                namespace: projectcontour
+              spec:
+                secretName: contourcert
+                usages:
+                  - server auth
+                  - client auth
+                dnsNames:
+                  - contour
+                  - contour.projectcontour
+                  - contour.projectcontour.svc
+                  - contour.projectcontour.svc.cluster.local
+                issuerRef:
+                  name: contour-ca-issuer
+                  kind: Issuer
+              ---
+              apiVersion: cert-manager.io/v1
+              kind: Certificate
+              metadata:
+                name: envoycert
+                namespace: projectcontour
+              spec:
+                secretName: envoycert
+                usages:
+                  - server auth
+                  - client auth
+                dnsNames:
+                  - envoy
+                  - envoy.projectcontour
+                  - envoy.projectcontour.svc
+                  - envoy.projectcontour.svc.cluster.local
+                issuerRef:
+                  name: contour-ca-issuer
+                  kind: Issuer
             # overlays/contour-config.yaml: |
             #   #@ load("@ytt:overlay", "overlay")
             #   #@overlay/match by=overlay.subset({"kind": "ConfigMap", "metadata":{"name":"contour"}})
