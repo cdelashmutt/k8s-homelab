@@ -1,0 +1,81 @@
+---
+- name: Initialize first k3s server node (embedded etcd)
+  hosts: k3s_init
+  gather_facts: true
+  become: true
+
+  vars:
+    k3s_version: "stable"
+
+  tasks:
+
+    - name: Install k3s on init node
+      shell: |
+        curl -sfL https://get.k3s.io | \
+          K3S_TOKEN="{{ k3s_token }}" \
+          INSTALL_K3S_CHANNEL="{{ k3s_version }}" \
+          sh -s - server \
+            --cluster-init \
+            --disable=servicelb \
+            --tls-san 192.168.0.50 \
+            --tls-san ubuntu1.home
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait until node is Ready
+      command: k3s kubectl get node "{{ ansible_hostname }}" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+      register: node_ready
+      retries: 30
+      delay: 10
+      until: node_ready.stdout == "True"
+
+    - name: Fetch kubeconfig from init node
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: "{{ lookup('env', 'HOME') }}/.kube/k3s-homelab.yaml"
+        flat: true
+
+- name: Join remaining server nodes to k3s cluster
+  hosts: k3s_join
+  serial: 1
+  gather_facts: true
+  become: true
+
+  vars:
+    k3s_version: "stable"
+
+  tasks:
+
+    - name: Join node to k3s cluster
+      shell: |
+        curl -sfL https://get.k3s.io | \
+          K3S_TOKEN="{{ k3s_token }}" \
+          INSTALL_K3S_CHANNEL="{{ k3s_version }}" \
+          sh -s - server \
+            --server https://ubuntu1.home:6443 \
+            --disable=servicelb
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait until node is Ready
+      delegate_to: "{{ groups['k3s_init'][0] }}"
+      command: k3s kubectl get node "{{ ansible_hostname }}" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+      register: node_ready
+      retries: 30
+      delay: 10
+      until: node_ready.stdout == "True"
+
+- name: Verify cluster
+  hosts: k3s_init
+  gather_facts: false
+  become: true
+
+  tasks:
+
+    - name: Show all cluster nodes
+      command: k3s kubectl get nodes -o wide
+      register: nodes_output
+
+    - name: Print nodes
+      debug:
+        msg: "{{ nodes_output.stdout_lines }}"

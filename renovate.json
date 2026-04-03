@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "regexManagers": [
+    {
+      "description": "Detect k3s minor version channel in system-upgrade Plan and open a PR when a new minor is released",
+      "fileMatch": ["clusters/bare-metal/config/system-upgrade/plans\\.yaml"],
+      "matchStrings": [
+        "channel: https://update\\.k3s\\.io/v1-release/channels/(?<currentValue>v[0-9]+\\.[0-9]+)"
+      ],
+      "depNameTemplate": "k3s-io/k3s",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^(?<major>v[0-9]+\\.[0-9]+)"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["k3s-io/k3s"],
+      "matchUpdateTypes": ["minor", "major"],
+      "labels": ["k8s-upgrade"],
+      "assignees": ["cdelashmutt"],
+      "commitMessagePrefix": "chore(k3s):"
+    },
+    {
+      "matchPackageNames": ["k3s-io/k3s"],
+      "matchUpdateTypes": ["patch"],
+      "enabled": false
+    }
+  ]
+}

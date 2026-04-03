@@ -1,0 +1,39 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: longhorn
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: longhorn
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - helmChart:
+      name: longhorn
+      version: "1.7.2"
+      repository:
+        url: https://charts.longhorn.io
+  template:
+  - helmTemplate:
+      namespace: longhorn-system
+      values:
+      - |
+        defaultSettings:
+          defaultReplicaCount: 2
+        persistence:
+          defaultClass: true
+          defaultClassReplicaCount: 2
+          reclaimPolicy: Delete
+  - ytt:
+      inline:
+        paths:
+          namespace.yaml: |
+            ---
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: longhorn-system
+  deploy:
+  - kapp: {}

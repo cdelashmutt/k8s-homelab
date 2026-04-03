@@ -1,0 +1,28 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: system-upgrade-controller
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: system-upgrade-controller
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - http:
+      url: https://github.com/rancher/system-upgrade-controller/releases/latest/download/system-upgrade-controller.yaml
+  - http:
+      url: https://github.com/rancher/system-upgrade-controller/releases/latest/download/crd.yaml
+  template:
+  - ytt:
+      inline:
+        paths:
+          namespace.yaml: |
+            ---
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: system-upgrade
+  deploy:
+  - kapp: {}

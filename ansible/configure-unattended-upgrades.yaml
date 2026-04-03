@@ -1,0 +1,51 @@
+---
+- name: Configure unattended-upgrades for automatic OS security patching
+  hosts: k8s
+  gather_facts: true
+  become: true
+
+  tasks:
+
+    - name: Install unattended-upgrades and apt-listchanges
+      apt:
+        name:
+          - unattended-upgrades
+          - apt-listchanges
+        state: present
+        update_cache: true
+
+    - name: Configure unattended-upgrades (security only, let kured handle reboots)
+      copy:
+        dest: /etc/apt/apt.conf.d/50unattended-upgrades
+        content: |
+          Unattended-Upgrade::Allowed-Origins {
+            "${distro_id}:${distro_codename}-security";
+          };
+          Unattended-Upgrade::Package-Blacklist {
+          };
+          Unattended-Upgrade::DevRelease "false";
+          Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+          Unattended-Upgrade::MinimalSteps "true";
+          Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+          Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+          Unattended-Upgrade::Remove-Unused-Dependencies "true";
+          // Do NOT set Automatic-Reboot here — kured watches /var/run/reboot-required
+          // and handles reboots with proper Kubernetes drain/uncordon.
+          Unattended-Upgrade::Automatic-Reboot "false";
+        mode: '0644'
+
+    - name: Enable unattended-upgrades timer
+      copy:
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        content: |
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Download-Upgradeable-Packages "1";
+          APT::Periodic::AutocleanInterval "7";
+          APT::Periodic::Unattended-Upgrade "1";
+        mode: '0644'
+
+    - name: Enable and start unattended-upgrades service
+      systemd:
+        name: unattended-upgrades
+        enabled: true
+        state: started

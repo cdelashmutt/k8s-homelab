@@ -1,0 +1,31 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: kured
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: kured
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - helmChart:
+      name: kured
+      version: "5.5.2"
+      repository:
+        url: https://kubereboot.github.io/charts
+  template:
+  - helmTemplate:
+      namespace: kube-system
+      values:
+      - |
+        configuration:
+          # Only reboot during this window to avoid unexpected disruptions
+          rebootDays: [sa]
+          startTime: "02:00"
+          endTime: "06:00"
+          # Reboot one node at a time (Kubernetes drain handled by kured)
+          concurrency: 1
+  deploy:
+  - kapp: {}

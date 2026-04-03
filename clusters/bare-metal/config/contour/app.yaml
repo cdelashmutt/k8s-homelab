@@ -79,7 +79,6 @@ spec:
               spec:
                 toNamespaces:
                 - harbor
-                - rook-ceph
                 - librechat
               ---
               apiVersion: cert-manager.io/v1

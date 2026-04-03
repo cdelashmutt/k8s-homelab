@@ -1,0 +1,26 @@
+---
+# This Plan pins to the v1.32 minor version channel.
+# Patch upgrades (1.32.x) happen automatically.
+#
+# When Renovate opens a PR to bump this to v1.33, review the k3s release notes,
+# then merge — kapp-controller will apply it and system-upgrade-controller will
+# roll the upgrade across all nodes one at a time.
+apiVersion: upgrade.cattle.io/v1
+kind: Plan
+metadata:
+  name: k3s-server
+  namespace: system-upgrade
+spec:
+  concurrency: 1
+  channel: https://update.k3s.io/v1-release/channels/v1.32
+  upgrade:
+    image: rancher/k3s-upgrade
+  drain:
+    force: true
+    ignoreDaemonSets: true
+    deleteEmptydirData: true
+  serviceAccountName: system-upgrade
+  nodeSelector:
+    matchExpressions:
+    - key: k3s.io/hostname
+      operator: Exists

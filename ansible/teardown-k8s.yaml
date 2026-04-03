@@ -1,0 +1,58 @@
+---
+- name: Tear down kubeadm Kubernetes cluster
+  hosts: k8s
+  serial: 1
+  gather_facts: true
+  become: true
+
+  tasks:
+
+    - name: Reset kubeadm
+      command: kubeadm reset --force
+      ignore_errors: true
+
+    - name: Unhold Kubernetes apt packages
+      command: apt-mark unhold kubeadm kubelet kubectl
+      ignore_errors: true
+
+    - name: Remove Kubernetes apt packages
+      apt:
+        name:
+          - kubeadm
+          - kubelet
+          - kubectl
+        state: absent
+        purge: true
+
+    - name: Remove CNI configuration
+      file:
+        path: /etc/cni/net.d
+        state: absent
+
+    - name: Unmount any lingering kubelet bind mounts
+      shell: |
+        mount | grep '/var/lib/kubelet' | awk '{print $3}' | sort -r | xargs -r umount -l
+      ignore_errors: true
+
+    - name: Remove Kubernetes data directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /var/lib/etcd
+        - /var/lib/kubelet
+        - /etc/kubernetes
+        - /var/lib/rook
+
+    - name: Flush iptables rules
+      iptables:
+        flush: true
+        table: "{{ item }}"
+      loop:
+        - filter
+        - nat
+        - mangle
+
+    - name: Reboot the node
+      reboot:
+        reboot_timeout: 600
