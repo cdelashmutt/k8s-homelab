@@ -35,5 +35,10 @@ spec:
             kind: Namespace
             metadata:
               name: longhorn-system
+          remove-uninstall-job.yaml: |
+            #@ load("@ytt:overlay", "overlay")
+            #@overlay/match by=overlay.subset({"kind": "Job", "metadata": {"name": "longhorn-uninstall"}}), expects="0+"
+            #@overlay/remove
+            ---
   deploy:
   - kapp: {}
