@@ -25,7 +25,7 @@
             name: system:kube-vip-role
           rules:
           - apiGroups: [""]
-            resources: [nodes, pods, endpoints, services, configmaps]
+            resources: [nodes, pods, endpoints, services, services/status, configmaps]
             verbs: [list, get, watch, update]
           - apiGroups: [coordination.k8s.io]
             resources: [leases]
