@@ -9,14 +9,120 @@
 
   tasks:
 
+    - name: Create kube-vip RBAC manifest
+      copy:
+        dest: /var/lib/rancher/k3s/server/manifests/kube-vip-rbac.yaml
+        content: |
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: kube-vip
+            namespace: kube-system
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRole
+          metadata:
+            name: system:kube-vip-role
+          rules:
+          - apiGroups: [""]
+            resources: [nodes, pods, endpoints, services, configmaps]
+            verbs: [list, get, watch, update]
+          - apiGroups: [coordination.k8s.io]
+            resources: [leases]
+            verbs: [list, get, watch, create, update, delete]
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: system:kube-vip-binding
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: system:kube-vip-role
+          subjects:
+          - kind: ServiceAccount
+            name: kube-vip
+            namespace: kube-system
+
+    - name: Create kube-vip DaemonSet manifest
+      copy:
+        dest: /var/lib/rancher/k3s/server/manifests/kube-vip.yaml
+        content: |
+          apiVersion: apps/v1
+          kind: DaemonSet
+          metadata:
+            name: kube-vip-ds
+            namespace: kube-system
+            labels:
+              app.kubernetes.io/name: kube-vip-ds
+          spec:
+            selector:
+              matchLabels:
+                app.kubernetes.io/name: kube-vip-ds
+            template:
+              metadata:
+                labels:
+                  app.kubernetes.io/name: kube-vip-ds
+              spec:
+                affinity:
+                  nodeAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                      nodeSelectorTerms:
+                      - matchExpressions:
+                        - key: node-role.kubernetes.io/control-plane
+                          operator: Exists
+                containers:
+                - name: kube-vip
+                  image: ghcr.io/kube-vip/kube-vip:v0.8.9
+                  args: [manager]
+                  env:
+                  - name: vip_arp
+                    value: "true"
+                  - name: port
+                    value: "6443"
+                  - name: vip_interface
+                    value: "{{ ansible_default_ipv4.interface }}"
+                  - name: cp_enable
+                    value: "true"
+                  - name: svc_enable
+                    value: "false"
+                  - name: vip_leaderelection
+                    value: "true"
+                  - name: vip_leaseduration
+                    value: "5"
+                  - name: vip_renewdeadline
+                    value: "3"
+                  - name: vip_retryperiod
+                    value: "1"
+                  - name: address
+                    value: "192.168.0.60"
+                  securityContext:
+                    capabilities:
+                      add: [NET_ADMIN, NET_RAW]
+                hostNetwork: true
+                serviceAccountName: kube-vip
+                tolerations:
+                - effect: NoSchedule
+                  operator: Exists
+                - effect: NoExecute
+                  operator: Exists
+
+    - name: Write k3s config with VIP TLS SANs
+      copy:
+        dest: /etc/rancher/k3s/config.yaml
+        content: |
+          tls-san:
+            - ubuntu1.home
+            - 192.168.0.60
+            - k8s.home.grogscave.net
+
     - name: Install k3s on init node
       shell: |
         curl -sfL https://get.k3s.io | \
           K3S_TOKEN="{{ k3s_token }}" \
           INSTALL_K3S_CHANNEL="{{ k3s_version }}" \
           sh -s - server \
-            --cluster-init \
-            --tls-san ubuntu1.home
+            --cluster-init
       args:
         creates: /usr/local/bin/k3s
 
@@ -27,11 +133,18 @@
       delay: 10
       until: node_ready.stdout == "True"
 
-    - name: Fetch kubeconfig from init node
-      fetch:
-        src: /etc/rancher/k3s/k3s.yaml
+    - name: Fetch kubeconfig and point at VIP
+      shell: |
+        sed 's|https://127.0.0.1:6443|https://k8s.home.grogscave.net:6443|g' \
+          /etc/rancher/k3s/k3s.yaml
+      register: kubeconfig_patched
+
+    - name: Write patched kubeconfig locally
+      local_action:
+        module: copy
+        content: "{{ kubeconfig_patched.stdout }}"
         dest: "{{ lookup('env', 'HOME') }}/.kube/k3s-homelab.yaml"
-        flat: true
+        mode: "0600"
 
 - name: Join remaining server nodes to k3s cluster
   hosts: k3s_join
