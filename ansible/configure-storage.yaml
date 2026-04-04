@@ -1,4 +1,38 @@
 ---
+# Configures multipath to blacklist iSCSI block devices used by Longhorn.
+# Without this, multipathd grabs Longhorn's iSCSI devices as multipath paths,
+# which causes fsck to report them as "in use" and prevents CSI mounts.
+- name: Configure multipath to ignore Longhorn iSCSI devices
+  hosts: k8s
+  gather_facts: false
+  become: true
+
+  tasks:
+
+    - name: Ensure multipath.conf blacklists sd* devices
+      copy:
+        dest: /etc/multipath.conf
+        content: |
+          blacklist {
+              devnode "^sd[a-z0-9]+"
+          }
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload multipathd
+
+    - name: Ensure multipathd is running
+      systemd:
+        name: multipathd
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Reload multipathd
+      systemd:
+        name: multipathd
+        state: reloaded
+
 # Formats the node's dedicated storage disk and mounts it at /var/lib/longhorn.
 # Longhorn automatically uses /var/lib/longhorn as its data path.
 #
