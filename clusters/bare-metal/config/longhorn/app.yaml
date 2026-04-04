@@ -41,4 +41,6 @@ spec:
             #@overlay/remove
             ---
   deploy:
-  - kapp: {}
+  - kapp:
+      rawOptions:
+      - --apply-default-update-strategy=fallback-on-replace
