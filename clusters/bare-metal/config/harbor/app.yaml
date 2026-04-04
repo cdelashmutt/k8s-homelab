@@ -90,35 +90,35 @@ spec:
                     - -c
                     - |
                       set -e
-                      HARBOR_URL="https://${HARBOR_HOSTNAME}"
+                      HARBOR_URL="http://harbor-core.harbor.svc.cluster.local:8080"
 
                       echo "Waiting for Harbor API..."
-                      until curl -skf "${HARBOR_URL}/api/v2.0/systeminfo" | grep -q 'harbor_version'; do
+                      until curl -sf "${HARBOR_URL}/api/v2.0/systeminfo" | grep -q 'harbor_version'; do
                         sleep 10
                       done
                       echo "Harbor is ready."
 
                       # Create docker-hub registry endpoint if not exists
-                      if ! curl -sk -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+                      if ! curl -sf -u "admin:${HARBOR_ADMIN_PASSWORD}" \
                           "${HARBOR_URL}/api/v2.0/registries?name=docker-hub" | grep -q '"name":"docker-hub"'; then
                         echo "Creating docker-hub registry..."
-                        curl -skf -X POST -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+                        curl -sf -X POST -u "admin:${HARBOR_ADMIN_PASSWORD}" \
                           -H "Content-Type: application/json" \
                           "${HARBOR_URL}/api/v2.0/registries" \
                           -d '{"name":"docker-hub","type":"docker-hub","url":"https://hub.docker.com","insecure":false}'
                         echo ""
                       fi
 
-                      REG_ID=$(curl -sk -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+                      REG_ID=$(curl -sf -u "admin:${HARBOR_ADMIN_PASSWORD}" \
                         "${HARBOR_URL}/api/v2.0/registries?name=docker-hub" | \
                         grep -o '"id":[0-9]*' | head -1 | cut -d: -f2)
                       echo "docker-hub registry id: ${REG_ID}"
 
                       # Create docker-hub proxy project if not exists
-                      if ! curl -sk -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+                      if ! curl -sf -u "admin:${HARBOR_ADMIN_PASSWORD}" \
                           "${HARBOR_URL}/api/v2.0/projects?name=docker-hub" | grep -q '"name":"docker-hub"'; then
                         echo "Creating docker-hub proxy project..."
-                        curl -skf -X POST -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+                        curl -sf -X POST -u "admin:${HARBOR_ADMIN_PASSWORD}" \
                           -H "Content-Type: application/json" \
                           "${HARBOR_URL}/api/v2.0/projects" \
                           -d "{\"project_name\":\"docker-hub\",\"public\":true,\"registry_id\":${REG_ID}}"
@@ -126,10 +126,10 @@ spec:
                       fi
 
                       # Create homelab project if not exists
-                      if ! curl -sk -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+                      if ! curl -sf -u "admin:${HARBOR_ADMIN_PASSWORD}" \
                           "${HARBOR_URL}/api/v2.0/projects?name=homelab" | grep -q '"name":"homelab"'; then
                         echo "Creating homelab project..."
-                        curl -skf -X POST -u "admin:${HARBOR_ADMIN_PASSWORD}" \
+                        curl -sf -X POST -u "admin:${HARBOR_ADMIN_PASSWORD}" \
                           -H "Content-Type: application/json" \
                           "${HARBOR_URL}/api/v2.0/projects" \
                           -d '{"project_name":"homelab","public":false}'
