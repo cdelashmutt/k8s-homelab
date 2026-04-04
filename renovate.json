@@ -47,7 +47,7 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["/clusters/bare-metal/config/harbor/app\\.yaml/", "/clusters/bare-metal/config/kured/app\\.yaml/", "/clusters/bare-metal/config/longhorn/app\\.yaml/"],
+      "managerFilePatterns": ["/clusters/bare-metal/config/harbor/app\\.yaml/", "/clusters/bare-metal/config/kured/app\\.yaml/", "/clusters/bare-metal/config/longhorn/app\\.yaml/", "/clusters/bare-metal/config/monitoring/app\\.yaml/"],
       "matchStrings": ["helmChart:\\s+name: (?<depName>[^\\s]+)\\s+version: \"?(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)\"?\\s+repository:\\s+url: (?<registryUrl>[^\\s]+)"],
       "datasourceTemplate": "helm"
     }

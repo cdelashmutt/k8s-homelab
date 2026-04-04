@@ -1,0 +1,79 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: monitoring
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: monitoring
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - helmChart:
+      name: kube-prometheus-stack
+      version: "70.4.2"
+      repository:
+        url: https://prometheus-community.github.io/helm-charts
+  template:
+  - helmTemplate:
+      namespace: monitoring
+      valuesFrom:
+      - secretRef:
+          name: alertmanager-values
+      values:
+      - |
+        grafana:
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            hosts:
+            - grafana.home.grogscave.net
+            tls:
+            - secretName: wildcard-tls
+              hosts:
+              - grafana.home.grogscave.net
+          sidecar:
+            datasources:
+              enabled: true
+        prometheus:
+          prometheusSpec:
+            retention: 15d
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: longhorn
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 20Gi
+        alertmanager:
+          alertmanagerSpec:
+            storage:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: longhorn
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 1Gi
+  - ytt:
+      inline:
+        paths:
+          namespace.yaml: |
+            ---
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: monitoring
+          secretimport.yaml: |
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: wildcard-tls
+              namespace: monitoring
+            spec:
+              fromNamespace: cert-manager
+  deploy:
+  - kapp: {}
