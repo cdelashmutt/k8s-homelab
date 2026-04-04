@@ -65,6 +65,12 @@
       "enabled": false
     },
     {
+      "matchPackageNames": ["longhorn"],
+      "matchUpdateTypes": ["minor", "major"],
+      "enabled": false,
+      "description": "Longhorn requires upgrading one minor version at a time — bump manually"
+    },
+    {
       "matchDatasources": ["helm", "github-releases", "docker"],
       "matchUpdateTypes": ["minor", "patch"],
       "labels": ["dependencies"],

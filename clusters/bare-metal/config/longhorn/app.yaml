@@ -12,7 +12,7 @@ spec:
   fetch:
   - helmChart:
       name: longhorn
-      version: "1.11.1"
+      version: "1.7.2"
       repository:
         url: https://charts.longhorn.io
   template:
