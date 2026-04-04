@@ -11,9 +11,9 @@ spec:
   syncPeriod: 10m
   fetch:
   - http:
-      url: https://github.com/rancher/system-upgrade-controller/releases/latest/download/system-upgrade-controller.yaml
+      url: https://github.com/rancher/system-upgrade-controller/releases/download/v0.19.0/system-upgrade-controller.yaml
   - http:
-      url: https://github.com/rancher/system-upgrade-controller/releases/latest/download/crd.yaml
+      url: https://github.com/rancher/system-upgrade-controller/releases/download/v0.19.0/crd.yaml
   template:
   - ytt:
       inline:

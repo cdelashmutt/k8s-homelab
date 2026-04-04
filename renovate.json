@@ -3,14 +3,64 @@
   "extends": ["config:base"],
   "regexManagers": [
     {
-      "description": "Detect k3s minor version channel in system-upgrade Plan and open a PR when a new minor is released",
-      "fileMatch": ["clusters/bare-metal/config/system-upgrade/plans\\.yaml"],
+      "fileMatch": ["clusters/bare-metal/config/system-upgrade/app\\.yaml"],
       "matchStrings": [
         "channel: https://update\\.k3s\\.io/v1-release/channels/(?<currentValue>v[0-9]+\\.[0-9]+)"
       ],
       "depNameTemplate": "k3s-io/k3s",
       "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^(?<major>v[0-9]+\\.[0-9]+)"
+      "extractVersionTemplate": "^v(?<major>[0-9]+)\\.(?<minor>[0-9]+)"
+    },
+    {
+      "fileMatch": ["clusters/bare-metal/config/system-upgrade/app\\.yaml"],
+      "matchStrings": [
+        "https://github\\.com/rancher/system-upgrade-controller/releases/download/(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)/system-upgrade-controller\\.yaml"
+      ],
+      "depNameTemplate": "rancher/system-upgrade-controller",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "fileMatch": ["install\\.sh"],
+      "matchStrings": [
+        "kapp-controller/releases/download/(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)/release\\.yml"
+      ],
+      "depNameTemplate": "carvel-dev/kapp-controller",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "fileMatch": ["install\\.sh"],
+      "matchStrings": [
+        "secretgen-controller/releases/download/(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)/release\\.yml"
+      ],
+      "depNameTemplate": "carvel-dev/secretgen-controller",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "fileMatch": ["clusters/bare-metal/config/cert-manager/app\\.yaml"],
+      "matchStrings": [
+        "cert-manager/releases/download/(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)/cert-manager\\.yaml"
+      ],
+      "depNameTemplate": "cert-manager/cert-manager",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "fileMatch": ["clusters/bare-metal/config/external-dns/deployment\\.yaml"],
+      "matchStrings": [
+        "image: registry\\.k8s\\.io/external-dns/external-dns:(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)"
+      ],
+      "depNameTemplate": "registry.k8s.io/external-dns/external-dns",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": [
+        "clusters/bare-metal/config/harbor/app\\.yaml",
+        "clusters/bare-metal/config/kured/app\\.yaml",
+        "clusters/bare-metal/config/longhorn/app\\.yaml"
+      ],
+      "matchStrings": [
+        "helmChart:\\s+name: (?<depName>[^\\s]+)\\s+version: \"?(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)\"?\\s+repository:\\s+url: (?<registryUrl>[^\\s]+)"
+      ],
+      "datasourceTemplate": "helm"
     }
   ],
   "packageRules": [
@@ -18,13 +68,18 @@
       "matchPackageNames": ["k3s-io/k3s"],
       "matchUpdateTypes": ["minor", "major"],
       "labels": ["k8s-upgrade"],
-      "assignees": ["cdelashmutt"],
-      "commitMessagePrefix": "chore(k3s):"
+      "assignees": ["cdelashmutt"]
     },
     {
       "matchPackageNames": ["k3s-io/k3s"],
       "matchUpdateTypes": ["patch"],
       "enabled": false
+    },
+    {
+      "matchDatasources": ["helm", "github-releases", "docker"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "labels": ["dependencies"],
+      "assignees": ["cdelashmutt"]
     }
   ]
 }
