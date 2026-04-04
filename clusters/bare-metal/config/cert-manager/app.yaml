@@ -19,6 +19,30 @@ spec:
         inline:
           paths: 
             #@yaml/text-templated-strings
+            overlays/wildcard-cert.yaml: |
+              ---
+              apiVersion: cert-manager.io/v1
+              kind: Certificate
+              metadata:
+                name: wildcard-tls
+                namespace: cert-manager
+              spec:
+                secretName: wildcard-tls
+                issuerRef:
+                  name: letsencrypt-cluster-issuer
+                  kind: ClusterIssuer
+                dnsNames:
+                  - "*.home.grogscave.net"
+              ---
+              apiVersion: secretgen.carvel.dev/v1alpha1
+              kind: SecretExport
+              metadata:
+                name: wildcard-tls
+                namespace: cert-manager
+              spec:
+                toNamespaces:
+                  - harbor
+                  - kube-system
             overlays/lets-encrypt.yaml: |
               ---
               apiVersion: v1

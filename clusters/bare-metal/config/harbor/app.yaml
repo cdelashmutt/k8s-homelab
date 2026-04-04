@@ -5,8 +5,8 @@ metadata:
   name: harbor
   namespace: bootstrap
   annotations:
-    kapp.k14s.io/change-rule.0: "upsert after upserting contour"
-    kapp.k14s.io/change-rule.1: "delete before deleting contour"
+    kapp.k14s.io/change-rule.0: "upsert after upserting cert-manager"
+    kapp.k14s.io/change-rule.1: "delete before deleting cert-manager"
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
@@ -47,7 +47,7 @@ spec:
               name: wildcard-tls
               namespace: harbor
             spec:
-              fromNamespace: projectcontour
+              fromNamespace: cert-manager
             ---
             apiVersion: secretgen.carvel.dev/v1alpha1
             kind: SecretImport
