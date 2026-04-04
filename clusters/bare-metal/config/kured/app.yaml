@@ -12,7 +12,7 @@ spec:
   fetch:
   - helmChart:
       name: kured
-      version: "5.5.2"
+      version: "5.11.0"
       repository:
         url: https://kubereboot.github.io/charts
   template:
