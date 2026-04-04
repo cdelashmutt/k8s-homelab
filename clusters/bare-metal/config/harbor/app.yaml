@@ -93,7 +93,7 @@ spec:
                       HARBOR_URL="http://harbor-core.harbor.svc.cluster.local:80"
 
                       echo "Waiting for Harbor API..."
-                      until curl -sf "${HARBOR_URL}/api/v2.0/systeminfo" | grep -q 'harbor_version'; do
+                      until curl -sf "${HARBOR_URL}/api/v2.0/systeminfo" | grep -q 'auth_mode'; do
                         sleep 10
                       done
                       echo "Harbor is ready."
