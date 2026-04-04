@@ -48,18 +48,15 @@ spec:
               namespace: harbor
             spec:
               fromNamespace: projectcontour
-          harbor-setup.yaml: |
-            #@ load("@ytt:data", "data")
             ---
-            apiVersion: v1
-            kind: Secret
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
             metadata:
               name: harbor-admin-credentials
               namespace: harbor
-            type: Opaque
-            stringData:
-              password: #@ data.values.harbor.harborAdminPassword
-              hostname: #@ data.values.harbor.hostname
+            spec:
+              fromNamespace: bootstrap
+          harbor-setup.yaml: |
             ---
             apiVersion: batch/v1
             kind: Job
