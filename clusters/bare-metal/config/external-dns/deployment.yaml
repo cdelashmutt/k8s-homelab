@@ -19,7 +19,7 @@ spec:
     spec:
       serviceAccountName: external-dns
       nodeSelector:
-        node-role.kubernetes.io/control-plane:
+        node-role.kubernetes.io/control-plane: "true"
       tolerations:
       - effect: NoExecute
         operator: Exists
