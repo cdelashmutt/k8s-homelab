@@ -1,4 +1,66 @@
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-values
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: monitoring-values
+data:
+  values.yaml: |
+    grafana:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+        - grafana.home.grogscave.net
+        tls:
+        - secretName: wildcard-tls
+          hosts:
+          - grafana.home.grogscave.net
+      sidecar:
+        datasources:
+          enabled: true
+    prometheus:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+        - prometheus.home.grogscave.net
+        tls:
+        - secretName: wildcard-tls
+          hosts:
+          - prometheus.home.grogscave.net
+      prometheusSpec:
+        retention: 15d
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 20Gi
+    alertmanager:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+        - alertmanager.home.grogscave.net
+        tls:
+        - secretName: wildcard-tls
+          hosts:
+          - alertmanager.home.grogscave.net
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 1Gi
+---
 apiVersion: kappctrl.k14s.io/v1alpha1
 kind: App
 metadata:
@@ -6,6 +68,7 @@ metadata:
   namespace: bootstrap
   annotations:
     kapp.k14s.io/change-group: monitoring
+    kapp.k14s.io/change-rule: "upsert after upserting monitoring-values"
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
@@ -21,60 +84,8 @@ spec:
       valuesFrom:
       - secretRef:
           name: alertmanager-values
-      values:
-      - |
-        grafana:
-          ingress:
-            enabled: true
-            ingressClassName: traefik
-            hosts:
-            - grafana.home.grogscave.net
-            tls:
-            - secretName: wildcard-tls
-              hosts:
-              - grafana.home.grogscave.net
-          sidecar:
-            datasources:
-              enabled: true
-        prometheus:
-          ingress:
-            enabled: true
-            ingressClassName: traefik
-            hosts:
-            - prometheus.home.grogscave.net
-            tls:
-            - secretName: wildcard-tls
-              hosts:
-              - prometheus.home.grogscave.net
-          prometheusSpec:
-            retention: 15d
-            storageSpec:
-              volumeClaimTemplate:
-                spec:
-                  storageClassName: longhorn
-                  accessModes: ["ReadWriteOnce"]
-                  resources:
-                    requests:
-                      storage: 20Gi
-        alertmanager:
-          ingress:
-            enabled: true
-            ingressClassName: traefik
-            hosts:
-            - alertmanager.home.grogscave.net
-            tls:
-            - secretName: wildcard-tls
-              hosts:
-              - alertmanager.home.grogscave.net
-          alertmanagerSpec:
-            storage:
-              volumeClaimTemplate:
-                spec:
-                  storageClassName: longhorn
-                  accessModes: ["ReadWriteOnce"]
-                  resources:
-                    requests:
-                      storage: 1Gi
+      - configMapRef:
+          name: monitoring-values
   - ytt:
       inline:
         paths:
