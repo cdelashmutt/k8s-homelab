@@ -1,0 +1,52 @@
+---
+# Formats the node's dedicated storage disk and mounts it at /var/lib/longhorn.
+# Longhorn automatically uses /var/lib/longhorn as its data path.
+#
+# The disk device is set per-host in inventory.ini via longhorn_disk=<device>.
+# Example: ubuntu1.home longhorn_disk=nvme0n1
+#
+# If a node has no dedicated disk, skip this playbook — Longhorn will fall
+# back to the OS disk (/var/lib/longhorn on the root filesystem).
+- name: Configure Longhorn storage disk
+  hosts: k8s
+  gather_facts: true
+  become: true
+
+  tasks:
+
+    - name: Skip if no longhorn_disk defined
+      meta: end_host
+      when: longhorn_disk is not defined
+
+    - name: Check if disk is already formatted as ext4 with longhorn label
+      command: blkid -t LABEL=longhorn /dev/{{ longhorn_disk }}
+      register: blkid_result
+      ignore_errors: true
+      changed_when: false
+
+    - name: Wipe existing signatures (e.g. leftover Ceph/bluestore) before formatting
+      command: wipefs -a /dev/{{ longhorn_disk }}
+      when: blkid_result.rc != 0
+
+    - name: Format disk with ext4
+      command: mkfs.ext4 -L longhorn /dev/{{ longhorn_disk }}
+      when: blkid_result.rc != 0
+
+    - name: Create mount point
+      file:
+        path: /var/lib/longhorn
+        state: directory
+        mode: '0755'
+
+    - name: Get disk UUID
+      command: blkid -s UUID -o value /dev/{{ longhorn_disk }}
+      register: disk_uuid
+      changed_when: false
+
+    - name: Mount disk persistently via fstab
+      mount:
+        path: /var/lib/longhorn
+        src: "UUID={{ disk_uuid.stdout }}"
+        fstype: ext4
+        opts: defaults
+        state: mounted
