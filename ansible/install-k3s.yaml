@@ -115,6 +115,9 @@
             - ubuntu1.home
             - 192.168.0.60
             - k8s.home.grogscave.net
+          disable:
+            - servicelb
+      notify: Restart k3s
 
     - name: Install k3s on init node
       shell: |
@@ -146,6 +149,12 @@
         dest: "{{ lookup('env', 'HOME') }}/.kube/k3s-homelab.yaml"
         mode: "0600"
 
+  handlers:
+    - name: Restart k3s
+      systemd:
+        name: k3s
+        state: restarted
+
 - name: Join remaining server nodes to k3s cluster
   hosts: k3s_join
   serial: 1
@@ -156,6 +165,14 @@
     k3s_version: "stable"
 
   tasks:
+
+    - name: Write k3s config to disable servicelb
+      copy:
+        dest: /etc/rancher/k3s/config.yaml
+        content: |
+          disable:
+            - servicelb
+      notify: Restart k3s
 
     - name: Join node to k3s cluster
       shell: |
@@ -174,6 +191,12 @@
       retries: 30
       delay: 10
       until: node_ready.stdout == "True"
+
+  handlers:
+    - name: Restart k3s
+      systemd:
+        name: k3s
+        state: restarted
 
 - name: Verify cluster
   hosts: k3s_init

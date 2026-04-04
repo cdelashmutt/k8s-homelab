@@ -37,6 +37,15 @@ spec:
             datasources:
               enabled: true
         prometheus:
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            hosts:
+            - prometheus.home.grogscave.net
+            tls:
+            - secretName: wildcard-tls
+              hosts:
+              - prometheus.home.grogscave.net
           prometheusSpec:
             retention: 15d
             storageSpec:
@@ -48,6 +57,15 @@ spec:
                     requests:
                       storage: 20Gi
         alertmanager:
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            hosts:
+            - alertmanager.home.grogscave.net
+            tls:
+            - secretName: wildcard-tls
+              hosts:
+              - alertmanager.home.grogscave.net
           alertmanagerSpec:
             storage:
               volumeClaimTemplate:
