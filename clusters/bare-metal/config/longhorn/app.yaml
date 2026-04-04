@@ -35,18 +35,16 @@ spec:
             kind: Namespace
             metadata:
               name: longhorn-system
-          remove-uninstall-job.yaml: |
+          job-annotations.yaml: |
             #@ load("@ytt:overlay", "overlay")
+            #@overlay/match by=overlay.subset({"kind": "Job"}), expects="0+"
+            ---
+            metadata:
+              annotations:
+                #@overlay/match missing_ok=True
+                kapp.k14s.io/update-strategy: fallback-on-replace
+            ---
             #@overlay/match by=overlay.subset({"kind": "Job", "metadata": {"name": "longhorn-uninstall"}}), expects="0+"
             #@overlay/remove
-            ---
-          kapp-config.yaml: |
-            apiVersion: kapp.k14s.io/v1alpha1
-            kind: Config
-            minimumRequiredVersion: 0.23.0
-            updateStrategy:
-            - resourceMatchers:
-              - apiVersionKindMatcher: {apiVersion: batch/v1, kind: Job}
-              method: fallback-on-replace
   deploy:
   - kapp: {}
