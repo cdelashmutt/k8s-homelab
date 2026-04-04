@@ -1,65 +1,54 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"],
-  "regexManagers": [
+  "extends": ["config:recommended"],
+  "customManagers": [
     {
-      "fileMatch": ["clusters/bare-metal/config/system-upgrade/app\\.yaml"],
-      "matchStrings": [
-        "channel: https://update\\.k3s\\.io/v1-release/channels/(?<currentValue>v[0-9]+\\.[0-9]+)"
-      ],
+      "customType": "regex",
+      "managerFilePatterns": ["/clusters/bare-metal/config/system-upgrade/app\.yaml/"],
+      "matchStrings": ["channel: https://update\.k3s\.io/v1-release/channels/(?<currentValue>v[0-9]+\.[0-9]+)"],
       "depNameTemplate": "k3s-io/k3s",
       "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<major>[0-9]+)\\.(?<minor>[0-9]+)"
+      "extractVersionTemplate": "^v(?<major>[0-9]+)\.(?<minor>[0-9]+)"
     },
     {
-      "fileMatch": ["clusters/bare-metal/config/system-upgrade/app\\.yaml"],
-      "matchStrings": [
-        "https://github\\.com/rancher/system-upgrade-controller/releases/download/(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)/system-upgrade-controller\\.yaml"
-      ],
+      "customType": "regex",
+      "managerFilePatterns": ["/clusters/bare-metal/config/system-upgrade/app\.yaml/"],
+      "matchStrings": ["https://github\.com/rancher/system-upgrade-controller/releases/download/(?<currentValue>v[0-9]+\.[0-9]+\.[0-9]+)/system-upgrade-controller\.yaml"],
       "depNameTemplate": "rancher/system-upgrade-controller",
       "datasourceTemplate": "github-releases"
     },
     {
-      "fileMatch": ["install\\.sh"],
-      "matchStrings": [
-        "kapp-controller/releases/download/(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)/release\\.yml"
-      ],
+      "customType": "regex",
+      "managerFilePatterns": ["/install\.sh/"],
+      "matchStrings": ["kapp-controller/releases/download/(?<currentValue>v[0-9]+\.[0-9]+\.[0-9]+)/release\.yml"],
       "depNameTemplate": "carvel-dev/kapp-controller",
       "datasourceTemplate": "github-releases"
     },
     {
-      "fileMatch": ["install\\.sh"],
-      "matchStrings": [
-        "secretgen-controller/releases/download/(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)/release\\.yml"
-      ],
+      "customType": "regex",
+      "managerFilePatterns": ["/install\.sh/"],
+      "matchStrings": ["secretgen-controller/releases/download/(?<currentValue>v[0-9]+\.[0-9]+\.[0-9]+)/release\.yml"],
       "depNameTemplate": "carvel-dev/secretgen-controller",
       "datasourceTemplate": "github-releases"
     },
     {
-      "fileMatch": ["clusters/bare-metal/config/cert-manager/app\\.yaml"],
-      "matchStrings": [
-        "cert-manager/releases/download/(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)/cert-manager\\.yaml"
-      ],
+      "customType": "regex",
+      "managerFilePatterns": ["/clusters/bare-metal/config/cert-manager/app\.yaml/"],
+      "matchStrings": ["cert-manager/releases/download/(?<currentValue>v[0-9]+\.[0-9]+\.[0-9]+)/cert-manager\.yaml"],
       "depNameTemplate": "cert-manager/cert-manager",
       "datasourceTemplate": "github-releases"
     },
     {
-      "fileMatch": ["clusters/bare-metal/config/external-dns/deployment\\.yaml"],
-      "matchStrings": [
-        "image: registry\\.k8s\\.io/external-dns/external-dns:(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)"
-      ],
+      "customType": "regex",
+      "managerFilePatterns": ["/clusters/bare-metal/config/external-dns/deployment\.yaml/"],
+      "matchStrings": ["image: registry\.k8s\.io/external-dns/external-dns:(?<currentValue>v[0-9]+\.[0-9]+\.[0-9]+)"],
       "depNameTemplate": "registry.k8s.io/external-dns/external-dns",
       "datasourceTemplate": "docker"
     },
     {
-      "fileMatch": [
-        "clusters/bare-metal/config/harbor/app\\.yaml",
-        "clusters/bare-metal/config/kured/app\\.yaml",
-        "clusters/bare-metal/config/longhorn/app\\.yaml"
-      ],
-      "matchStrings": [
-        "helmChart:\\s+name: (?<depName>[^\\s]+)\\s+version: \"?(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)\"?\\s+repository:\\s+url: (?<registryUrl>[^\\s]+)"
-      ],
+      "customType": "regex",
+      "managerFilePatterns": ["/clusters/bare-metal/config/harbor/app\.yaml/", "/clusters/bare-metal/config/kured/app\.yaml/", "/clusters/bare-metal/config/longhorn/app\.yaml/"],
+      "matchStrings": ["helmChart:\s+name: (?<depName>[^\s]+)\s+version: \"?(?<currentValue>[0-9]+\.[0-9]+\.[0-9]+)\"?\s+repository:\s+url: (?<registryUrl>[^\s]+)"],
       "datasourceTemplate": "helm"
     }
   ],
