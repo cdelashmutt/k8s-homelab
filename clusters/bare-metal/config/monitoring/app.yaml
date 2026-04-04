@@ -75,5 +75,9 @@ spec:
               namespace: monitoring
             spec:
               fromNamespace: cert-manager
+          remove-helm-tests.yaml: |
+            #@ load("@ytt:overlay", "overlay")
+            #@overlay/match by=overlay.subset({"metadata": {"annotations": {"helm.sh/hook": "test"}}}), expects="0+"
+            #@overlay/remove
   deploy:
   - kapp: {}
