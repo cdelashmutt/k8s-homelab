@@ -113,6 +113,7 @@ spec:
             #@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "monitoring-kube-prometheus-prometheus"}})
             ---
             metadata:
+              #@overlay/match missing_ok=True
               annotations:
                 #@overlay/match missing_ok=True
                 kapp.k14s.io/disable-label-scoping: ""
