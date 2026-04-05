@@ -17,6 +17,8 @@ data:
     metrics:
       serviceMonitor:
         enabled: true
+        additionalLabels:
+          release: monitoring
 ---
 apiVersion: kappctrl.k14s.io/v1alpha1
 kind: App

@@ -120,6 +120,8 @@ spec:
             metadata:
               name: kapp-controller
               namespace: monitoring
+              labels:
+                release: monitoring
             spec:
               namespaceSelector:
                 matchNames:

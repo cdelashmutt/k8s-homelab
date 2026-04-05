@@ -49,6 +49,13 @@ spec:
 
 For secret values, use a Secret + `secretRef:` instead. See `monitoring/values-secret.yaml` and `harbor/values-secret.yaml` for examples using ytt data value templating (`#@ load("@ytt:data", "data")`).
 
+## ServiceMonitor Label Requirement
+
+Prometheus is configured with `serviceMonitorSelector: matchLabels: release: monitoring`. Any ServiceMonitor not carrying that label will be silently ignored.
+
+- For manually-created ServiceMonitors (inline in app.yaml ytt), add `labels: release: monitoring` to the metadata.
+- For chart-generated ServiceMonitors, use the chart's `additionalLabels` value (e.g. Longhorn: `metrics.serviceMonitor.additionalLabels: {release: monitoring}`).
+
 ## kapp Label Scoping
 
 kapp-controller injects its `kapp.k14s.io/app` tracking label into Service `spec.selector`. This breaks Services whose pods are created by an operator (e.g. prometheus-operator) rather than kapp itself — the selector never matches, leaving the Service with no endpoints.
