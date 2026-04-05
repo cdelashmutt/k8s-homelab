@@ -1,183 +1,197 @@
 ---
-apiVersion: v1
-kind: Namespace
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
 metadata:
   name: adguard
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: adguard-config
-  namespace: adguard
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: adguard
+    kapp.k14s.io/change-rule: "upsert after upserting adguard-password"
 spec:
-  accessModes: [ReadWriteOnce]
-  storageClassName: longhorn
-  resources:
-    requests:
-      storage: 500Mi
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: adguard
-  namespace: adguard
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: adguard
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app: adguard
-    spec:
-      initContainers:
-      - name: init-config
-        image: httpd:alpine
-        command:
-        - sh
-        - -c
-        - |
-          if [ ! -f /opt/adguardhome/conf/AdGuardHome.yaml ]; then
-            HASH=$(htpasswd -bnBC 10 "" "$(cat /secrets/password)" | tr -d ':\n' | sed 's/^\$2y\$/\$2a\$/')
-            cat > /opt/adguardhome/conf/AdGuardHome.yaml <<EOF
-          bind_host: 0.0.0.0
-          bind_port: 3000
-          users:
-          - name: admin
-            password: "$HASH"
-          auth_attempts: 5
-          block_auth_min: 15
-          dns:
-            bind_hosts:
-            - 0.0.0.0
-            port: 53
-            upstream_dns:
-            - 1.1.1.1
-            - 8.8.8.8
-            bootstrap_dns:
-            - 1.1.1.1
-            - 8.8.8.8
-            protection_enabled: true
-            filtering_enabled: true
-            filters_update_interval: 24
-            querylog_enabled: true
-            querylog_interval: 90
-            statistics_interval: 7
-          filters:
-          - enabled: true
-            url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
-            name: AdGuard DNS filter
-            id: 1
-          dhcp:
-            enabled: false
-          schema_version: 27
-          EOF
-          fi
-        volumeMounts:
-        - name: config
-          mountPath: /opt/adguardhome/conf
-        - name: password
-          mountPath: /secrets
-          readOnly: true
-      containers:
-      - name: adguard
-        image: adguard/adguardhome:v0.107.57
-        ports:
-        - containerPort: 3000
-          name: http
-          protocol: TCP
-        - containerPort: 53
-          name: dns-tcp
-          protocol: TCP
-        - containerPort: 53
-          name: dns-udp
-          protocol: UDP
-        volumeMounts:
-        - name: config
-          mountPath: /opt/adguardhome/conf
-        - name: work
-          mountPath: /opt/adguardhome/work
-      volumes:
-      - name: config
-        persistentVolumeClaim:
-          claimName: adguard-config
-      - name: work
-        emptyDir: {}
-      - name: password
-        secret:
-          secretName: adguard-password
----
-# Separate TCP and UDP services are required for DNS — Kubernetes does not
-# support mixed-protocol LoadBalancer services with kube-vip. Both services
-# get the same explicit IP so DNS is always reachable at 192.168.0.51.
-apiVersion: v1
-kind: Service
-metadata:
-  name: adguard-dns-tcp
-  namespace: adguard
-spec:
-  type: LoadBalancer
-  loadBalancerIP: 192.168.0.51
-  selector:
-    app: adguard
-  ports:
-  - name: dns-tcp
-    port: 53
-    targetPort: 53
-    protocol: TCP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: adguard-dns-udp
-  namespace: adguard
-spec:
-  type: LoadBalancer
-  loadBalancerIP: 192.168.0.51
-  selector:
-    app: adguard
-  ports:
-  - name: dns-udp
-    port: 53
-    targetPort: 53
-    protocol: UDP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: adguard-http
-  namespace: adguard
-spec:
-  type: ClusterIP
-  selector:
-    app: adguard
-  ports:
-  - name: http
-    port: 3000
-    targetPort: 3000
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: adguard
-  namespace: adguard
-spec:
-  ingressClassName: traefik
-  rules:
-  - host: adguard.home.grogscave.net
-    http:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - inline:
       paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
+        adguard.yaml: |
+          ---
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: adguard-config
+            namespace: adguard
+          spec:
+            accessModes: [ReadWriteOnce]
+            storageClassName: longhorn
+            resources:
+              requests:
+                storage: 500Mi
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: adguard
+            namespace: adguard
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: adguard
+            strategy:
+              type: Recreate
+            template:
+              metadata:
+                labels:
+                  app: adguard
+              spec:
+                initContainers:
+                - name: init-config
+                  image: httpd:alpine
+                  command:
+                  - sh
+                  - -c
+                  - |
+                    if [ ! -f /opt/adguardhome/conf/AdGuardHome.yaml ]; then
+                      HASH=$(htpasswd -bnBC 10 "" "$(cat /secrets/password)" | tr -d ':\n' | sed 's/^\$2y\$/\$2a\$/')
+                      cat > /opt/adguardhome/conf/AdGuardHome.yaml <<EOF
+                    bind_host: 0.0.0.0
+                    bind_port: 3000
+                    users:
+                    - name: admin
+                      password: "$HASH"
+                    auth_attempts: 5
+                    block_auth_min: 15
+                    dns:
+                      bind_hosts:
+                      - 0.0.0.0
+                      port: 53
+                      upstream_dns:
+                      - 1.1.1.1
+                      - 8.8.8.8
+                      bootstrap_dns:
+                      - 1.1.1.1
+                      - 8.8.8.8
+                      protection_enabled: true
+                      filtering_enabled: true
+                      filters_update_interval: 24
+                      querylog_enabled: true
+                      querylog_interval: 90
+                      statistics_interval: 7
+                    filters:
+                    - enabled: true
+                      url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
+                      name: AdGuard DNS filter
+                      id: 1
+                    dhcp:
+                      enabled: false
+                    schema_version: 27
+                    EOF
+                    fi
+                  volumeMounts:
+                  - name: config
+                    mountPath: /opt/adguardhome/conf
+                  - name: password
+                    mountPath: /secrets
+                    readOnly: true
+                containers:
+                - name: adguard
+                  image: adguard/adguardhome:v0.107.57
+                  ports:
+                  - containerPort: 3000
+                    name: http
+                    protocol: TCP
+                  - containerPort: 53
+                    name: dns-tcp
+                    protocol: TCP
+                  - containerPort: 53
+                    name: dns-udp
+                    protocol: UDP
+                  volumeMounts:
+                  - name: config
+                    mountPath: /opt/adguardhome/conf
+                  - name: work
+                    mountPath: /opt/adguardhome/work
+                volumes:
+                - name: config
+                  persistentVolumeClaim:
+                    claimName: adguard-config
+                - name: work
+                  emptyDir: {}
+                - name: password
+                  secret:
+                    secretName: adguard-password
+          ---
+          # Separate TCP and UDP services required — kube-vip does not support
+          # mixed-protocol LoadBalancer services. Both get the same explicit IP.
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: adguard-dns-tcp
+            namespace: adguard
+          spec:
+            type: LoadBalancer
+            loadBalancerIP: 192.168.0.51
+            selector:
+              app: adguard
+            ports:
+            - name: dns-tcp
+              port: 53
+              targetPort: 53
+              protocol: TCP
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: adguard-dns-udp
+            namespace: adguard
+          spec:
+            type: LoadBalancer
+            loadBalancerIP: 192.168.0.51
+            selector:
+              app: adguard
+            ports:
+            - name: dns-udp
+              port: 53
+              targetPort: 53
+              protocol: UDP
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
             name: adguard-http
-            port:
-              number: 3000
-  tls:
-  - secretName: wildcard-tls
-    hosts:
-    - adguard.home.grogscave.net
+            namespace: adguard
+          spec:
+            type: ClusterIP
+            selector:
+              app: adguard
+            ports:
+            - name: http
+              port: 3000
+              targetPort: 3000
+          ---
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: adguard
+            namespace: adguard
+          spec:
+            ingressClassName: traefik
+            rules:
+            - host: adguard.home.grogscave.net
+              http:
+                paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: adguard-http
+                      port:
+                        number: 3000
+            tls:
+            - secretName: wildcard-tls
+              hosts:
+              - adguard.home.grogscave.net
+  template:
+  - ytt: {}
+  deploy:
+  - kapp: {}
