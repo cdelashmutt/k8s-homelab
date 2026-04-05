@@ -1,4 +1,21 @@
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kured-values
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: kured-values
+data:
+  values.yaml: |
+    configuration:
+      # Only reboot during this window to avoid unexpected disruptions
+      rebootDays: [sa]
+      startTime: "02:00"
+      endTime: "06:00"
+      # Reboot one node at a time (Kubernetes drain handled by kured)
+      concurrency: 1
+---
 apiVersion: kappctrl.k14s.io/v1alpha1
 kind: App
 metadata:
@@ -6,6 +23,7 @@ metadata:
   namespace: bootstrap
   annotations:
     kapp.k14s.io/change-group: kured
+    kapp.k14s.io/change-rule: "upsert after upserting kured-values"
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
@@ -18,14 +36,8 @@ spec:
   template:
   - helmTemplate:
       namespace: kube-system
-      values:
-      - |
-        configuration:
-          # Only reboot during this window to avoid unexpected disruptions
-          rebootDays: [sa]
-          startTime: "02:00"
-          endTime: "06:00"
-          # Reboot one node at a time (Kubernetes drain handled by kured)
-          concurrency: 1
+      valuesFrom:
+      - configMapRef:
+          name: kured-values
   deploy:
   - kapp: {}

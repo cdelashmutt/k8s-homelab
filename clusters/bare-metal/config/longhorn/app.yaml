@@ -1,4 +1,23 @@
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: longhorn-values
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: longhorn-values
+data:
+  values.yaml: |
+    defaultSettings:
+      defaultReplicaCount: 2
+    persistence:
+      defaultClass: true
+      defaultClassReplicaCount: 2
+      reclaimPolicy: Delete
+    metrics:
+      serviceMonitor:
+        enabled: true
+---
 apiVersion: kappctrl.k14s.io/v1alpha1
 kind: App
 metadata:
@@ -6,6 +25,7 @@ metadata:
   namespace: bootstrap
   annotations:
     kapp.k14s.io/change-group: longhorn
+    kapp.k14s.io/change-rule: "upsert after upserting longhorn-values"
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
@@ -18,17 +38,9 @@ spec:
   template:
   - helmTemplate:
       namespace: longhorn-system
-      values:
-      - |
-        defaultSettings:
-          defaultReplicaCount: 2
-        persistence:
-          defaultClass: true
-          defaultClassReplicaCount: 2
-          reclaimPolicy: Delete
-        metrics:
-          serviceMonitor:
-            enabled: true
+      valuesFrom:
+      - configMapRef:
+          name: longhorn-values
   - ytt:
       inline:
         paths:
