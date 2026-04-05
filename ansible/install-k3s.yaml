@@ -106,6 +106,7 @@
                   operator: Exists
                 - effect: NoExecute
                   operator: Exists
+      notify: Apply kube-vip DaemonSet manifest
 
     - name: Write k3s config with VIP TLS SANs
       copy:
@@ -187,6 +188,9 @@
       listen: Restart k3s
       command: k3s kubectl uncordon {{ ansible_hostname }}
       delegate_to: "{{ groups['k3s_init'][0] }}"
+
+    - name: Apply kube-vip DaemonSet manifest
+      command: k3s kubectl apply -f /var/lib/rancher/k3s/server/manifests/kube-vip.yaml
 
 - name: Join remaining server nodes to k3s cluster
   hosts: k3s_join
