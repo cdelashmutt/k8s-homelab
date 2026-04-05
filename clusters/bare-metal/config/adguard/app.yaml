@@ -128,9 +128,10 @@ spec:
           metadata:
             name: adguard-dns-tcp
             namespace: adguard
+            annotations:
+              kube-vip.io/loadbalancerIPs: 192.168.0.51
           spec:
             type: LoadBalancer
-            loadBalancerIP: 192.168.0.51
             selector:
               app: adguard
             ports:
@@ -144,9 +145,10 @@ spec:
           metadata:
             name: adguard-dns-udp
             namespace: adguard
+            annotations:
+              kube-vip.io/loadbalancerIPs: 192.168.0.51
           spec:
             type: LoadBalancer
-            loadBalancerIP: 192.168.0.51
             selector:
               app: adguard
             ports:
