@@ -18,6 +18,9 @@ data:
         - secretName: wildcard-tls
           hosts:
           - grafana.home.grogscave.net
+      grafana.ini:
+        dashboards:
+          default_home_dashboard_path: /tmp/dashboards/k8s-resources-cluster.json
       sidecar:
         datasources:
           enabled: true

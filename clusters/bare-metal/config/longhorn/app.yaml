@@ -26,6 +26,9 @@ spec:
           defaultClass: true
           defaultClassReplicaCount: 2
           reclaimPolicy: Delete
+        metrics:
+          serviceMonitor:
+            enabled: true
   - ytt:
       inline:
         paths:
