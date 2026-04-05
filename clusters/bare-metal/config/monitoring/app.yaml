@@ -24,6 +24,12 @@ data:
       sidecar:
         datasources:
           enabled: true
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
     prometheus:
       ingress:
         enabled: true
@@ -130,7 +136,11 @@ spec:
             #@overlay/remove
           disable-label-scoping.yaml: |
             #@ load("@ytt:overlay", "overlay")
-            #@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "monitoring-kube-prometheus-prometheus"}})
+            #@ operator_svcs = ["monitoring-kube-prometheus-prometheus", "monitoring-kube-prometheus-alertmanager"]
+            #@ def match_operator_svcs(index, left, right):
+            #@   return left.get("kind") == "Service" and left.get("metadata", {}).get("name") in operator_svcs
+            #@ end
+            #@overlay/match by=match_operator_svcs, expects="0+"
             ---
             metadata:
               #@overlay/match missing_ok=True

@@ -328,9 +328,9 @@ data:
               },
               "links": [
                 {
-                  "title": "Alertmanager",
-                  "url": "https://alertmanager.home.grogscave.net",
-                  "targetBlank": true
+                  "title": "Alertmanager Overview",
+                  "url": "/d/alertmanager-overview/alertmanager-overview",
+                  "targetBlank": false
                 }
               ]
             },
