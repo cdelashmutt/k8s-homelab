@@ -1,0 +1,1162 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homelab-overview-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  homelab-overview.json: |
+    {
+      "title": "Homelab Overview",
+      "uid": "homelab-overview",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "1m",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "panels": [
+        {
+          "id": 1,
+          "title": "Cluster Health",
+          "type": "row",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 2,
+          "title": "Nodes Ready",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 3
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Node Details",
+                  "url": "/d/200ac8fdbfbb74b39aff88118e4d1c2c/node-exporter-nodes",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"true\"})",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 0,
+            "y": 1,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 3,
+          "title": "Nodes Not Ready",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": []
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"false\"}) OR vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 4,
+            "y": 1,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 4,
+          "title": "CPU Usage",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Cluster Resources",
+                  "url": "/d/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))) * 100",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 8,
+            "y": 1,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 5,
+          "title": "Memory Usage",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Cluster Resources",
+                  "url": "/d/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "(1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)) * 100",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 12,
+            "y": 1,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 6,
+          "title": "Firing Alerts",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 3
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Alertmanager",
+                  "url": "https://alertmanager.home.grogscave.net",
+                  "targetBlank": true
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(ALERTS{alertstate=\"firing\",alertname!=\"Watchdog\"}) OR vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 16,
+            "y": 1,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 7,
+          "title": "kapp Reconcile Errors",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": []
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "sum(increase(controller_runtime_reconcile_errors_total{controller=\"app\"}[1h]))",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 20,
+            "y": 1,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 8,
+          "title": "Workloads",
+          "type": "row",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 5,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 9,
+          "title": "Running Pods",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Cluster Resources",
+                  "url": "/d/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(kube_pod_status_phase{phase=\"Running\"})",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 0,
+            "y": 6,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 10,
+          "title": "Failed Pods",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": []
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(kube_pod_status_phase{phase=\"Failed\"}) OR vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 4,
+            "y": 6,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 11,
+          "title": "Pending Pods",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": []
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(kube_pod_status_phase{phase=\"Pending\"}) OR vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 8,
+            "y": 6,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 12,
+          "title": "CrashLoopBackOff",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": []
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(kube_pod_container_status_waiting_reason{reason=\"CrashLoopBackOff\"}) OR vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 12,
+            "y": 6,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 13,
+          "title": "Deployments Degraded",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 3
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Cluster Resources",
+                  "url": "/d/efa86fd1d0c121a26444b636a3f509a8/kubernetes-compute-resources-cluster",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(kube_deployment_status_replicas_unavailable > 0) OR vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 16,
+            "y": 6,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 14,
+          "title": "PVCs Not Bound",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": []
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(kube_persistentvolumeclaim_status_phase{phase!=\"Bound\"}) OR vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 20,
+            "y": 6,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 15,
+          "title": "Storage",
+          "type": "row",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 10,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 16,
+          "title": "Longhorn Volumes",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Longhorn",
+                  "url": "/d/2BCgsldGz/longhorn-example-v1-4-0",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(longhorn_volume_capacity_bytes) OR on() vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 0,
+            "y": 11,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 17,
+          "title": "Longhorn Healthy",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Longhorn",
+                  "url": "/d/2BCgsldGz/longhorn-example-v1-4-0",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(longhorn_volume_robustness==2) OR on() vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 4,
+            "y": 11,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 18,
+          "title": "Longhorn Degraded",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Longhorn",
+                  "url": "/d/2BCgsldGz/longhorn-example-v1-4-0",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(longhorn_volume_robustness==3) OR on() vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 8,
+            "y": 11,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 19,
+          "title": "Longhorn Disk Used",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 85
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Longhorn",
+                  "url": "/d/2BCgsldGz/longhorn-example-v1-4-0",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "sum(longhorn_disk_usage_bytes) / sum(longhorn_disk_capacity_bytes) * 100",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 12,
+            "y": 11,
+            "w": 4,
+            "h": 4
+          }
+        },
+        {
+          "id": 20,
+          "title": "Longhorn Faulted",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [
+                {
+                  "title": "Longhorn",
+                  "url": "/d/2BCgsldGz/longhorn-example-v1-4-0",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(longhorn_volume_robustness==1) OR on() vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": {
+            "x": 16,
+            "y": 11,
+            "w": 4,
+            "h": 4
+          }
+        }
+      ],
+      "tags": [
+        "homelab",
+        "overview"
+      ],
+      "editable": true,
+      "graphTooltip": 0,
+      "links": [],
+      "annotations": {
+        "list": []
+      },
+      "templating": {
+        "list": []
+      }
+    }
