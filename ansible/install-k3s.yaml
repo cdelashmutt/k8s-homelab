@@ -117,6 +117,7 @@
             - k8s.home.grogscave.net
           disable:
             - servicelb
+          node-ip: "{{ node_ip }}"
       notify: Restart k3s
 
     - name: Install k3s on init node
@@ -143,6 +144,7 @@
       register: kubeconfig_patched
 
     - name: Write patched kubeconfig locally
+      become: false
       local_action:
         module: copy
         content: "{{ kubeconfig_patched.stdout }}"
@@ -150,10 +152,41 @@
         mode: "0600"
 
   handlers:
-    - name: Restart k3s
+    - name: Cordon node for restart
+      listen: Restart k3s
+      command: k3s kubectl cordon {{ ansible_hostname }}
+      delegate_to: "{{ groups['k3s_init'][0] }}"
+
+    - name: Drain node for restart
+      listen: Restart k3s
+      command: >
+        k3s kubectl drain {{ ansible_hostname }}
+        --ignore-daemonsets
+        --delete-emptydir-data
+        --disable-eviction
+        --grace-period=120
+        --timeout=300s
+      delegate_to: "{{ groups['k3s_init'][0] }}"
+
+    - name: Restart k3s service
+      listen: Restart k3s
       systemd:
         name: k3s
         state: restarted
+
+    - name: Wait for node Ready after restart
+      listen: Restart k3s
+      command: k3s kubectl get node {{ ansible_hostname }} -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+      register: _ready
+      retries: 30
+      delay: 10
+      until: _ready.stdout == "True"
+      delegate_to: "{{ groups['k3s_init'][0] }}"
+
+    - name: Uncordon node after restart
+      listen: Restart k3s
+      command: k3s kubectl uncordon {{ ansible_hostname }}
+      delegate_to: "{{ groups['k3s_init'][0] }}"
 
 - name: Join remaining server nodes to k3s cluster
   hosts: k3s_join
@@ -172,6 +205,7 @@
         content: |
           disable:
             - servicelb
+          node-ip: "{{ node_ip }}"
       notify: Restart k3s
 
     - name: Join node to k3s cluster
@@ -193,10 +227,41 @@
       until: node_ready.stdout == "True"
 
   handlers:
-    - name: Restart k3s
+    - name: Cordon node for restart
+      listen: Restart k3s
+      command: k3s kubectl cordon {{ ansible_hostname }}
+      delegate_to: "{{ groups['k3s_init'][0] }}"
+
+    - name: Drain node for restart
+      listen: Restart k3s
+      command: >
+        k3s kubectl drain {{ ansible_hostname }}
+        --ignore-daemonsets
+        --delete-emptydir-data
+        --disable-eviction
+        --grace-period=120
+        --timeout=300s
+      delegate_to: "{{ groups['k3s_init'][0] }}"
+
+    - name: Restart k3s service
+      listen: Restart k3s
       systemd:
         name: k3s
         state: restarted
+
+    - name: Wait for node Ready after restart
+      listen: Restart k3s
+      command: k3s kubectl get node {{ ansible_hostname }} -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+      register: _ready
+      retries: 30
+      delay: 10
+      until: _ready.stdout == "True"
+      delegate_to: "{{ groups['k3s_init'][0] }}"
+
+    - name: Uncordon node after restart
+      listen: Restart k3s
+      command: k3s kubectl uncordon {{ ansible_hostname }}
+      delegate_to: "{{ groups['k3s_init'][0] }}"
 
 - name: Verify cluster
   hosts: k3s_init
