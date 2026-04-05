@@ -25,6 +25,15 @@ spec:
   - ytt:
       inline:
         paths:
+          ip-pool.yaml: |
+            ---
+            apiVersion: v1
+            kind: ConfigMap
+            metadata:
+              name: kube-vip-cloud-provider
+              namespace: kube-system
+            data:
+              range-global: 192.168.0.50-192.168.0.59
           remove-helm-tests.yaml: |
             #@ load("@ytt:overlay", "overlay")
             #@overlay/match by=overlay.subset({"metadata": {"annotations": {"helm.sh/hook": "test"}}}), expects="0+"
