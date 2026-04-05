@@ -15,6 +15,12 @@ data:
       defaultClass: true
       defaultClassReplicaCount: 2
       reclaimPolicy: Delete
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      host: longhorn.home.grogscave.net
+      tls: true
+      tlsSecret: wildcard-tls
     metrics:
       serviceMonitor:
         enabled: true
