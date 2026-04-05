@@ -58,6 +58,35 @@ spec:
             kind: Namespace
             metadata:
               name: longhorn-system
+          recurring-jobs.yaml: |
+            ---
+            apiVersion: longhorn.io/v1beta2
+            kind: RecurringJob
+            metadata:
+              name: daily-snapshot
+              namespace: longhorn-system
+            spec:
+              cron: "0 2 * * *"
+              task: snapshot
+              groups:
+              - default
+              retain: 7
+              concurrency: 2
+              labels: {}
+            ---
+            apiVersion: longhorn.io/v1beta2
+            kind: RecurringJob
+            metadata:
+              name: weekly-backup
+              namespace: longhorn-system
+            spec:
+              cron: "0 3 * * 0"
+              task: backup
+              groups:
+              - default
+              retain: 4
+              concurrency: 2
+              labels: {}
           backup-target.yaml: |
             ---
             apiVersion: longhorn.io/v1beta2
