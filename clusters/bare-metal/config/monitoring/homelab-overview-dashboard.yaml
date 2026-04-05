@@ -934,7 +934,7 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "count(longhorn_volume_robustness==2) OR on() vector(0)",
+              "expr": "count(longhorn_volume_robustness{state=\"healthy\"} == 1) OR vector(0)",
               "instant": true,
               "refId": "A"
             }
@@ -999,7 +999,7 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "count(longhorn_volume_robustness==3) OR on() vector(0)",
+              "expr": "count(longhorn_volume_robustness{state=\"degraded\"} == 1) OR vector(0)",
               "instant": true,
               "refId": "A"
             }
@@ -1133,7 +1133,7 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "count(longhorn_volume_robustness==1) OR on() vector(0)",
+              "expr": "count(longhorn_volume_robustness{state=\"faulted\"} == 1) OR vector(0)",
               "instant": true,
               "refId": "A"
             }
