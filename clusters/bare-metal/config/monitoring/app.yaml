@@ -126,9 +126,7 @@ spec:
               namespaceSelector:
                 matchNames:
                 - kapp-controller
-              selector:
-                matchLabels:
-                  app: kapp-controller
+              selector: {}
               endpoints:
               - port: metrics
                 interval: 30s
