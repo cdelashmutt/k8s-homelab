@@ -43,6 +43,7 @@ spec:
                 toNamespaces:
                   - harbor
                   - kube-system
+                  - monitoring
             overlays/lets-encrypt.yaml: |
               ---
               apiVersion: v1

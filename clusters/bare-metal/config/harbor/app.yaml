@@ -7,6 +7,7 @@ metadata:
   annotations:
     kapp.k14s.io/change-rule.0: "upsert after upserting cert-manager"
     kapp.k14s.io/change-rule.1: "delete before deleting cert-manager"
+    kapp.k14s.io/change-rule.2: "upsert after upserting longhorn"
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m

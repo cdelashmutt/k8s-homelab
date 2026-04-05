@@ -6,7 +6,8 @@ metadata:
   namespace: bootstrap
   annotations:
     kapp.k14s.io/change-group: external-dns
-    kapp.k14s.io/change-rule: "upsert after upserting external-dns-secret"
+    kapp.k14s.io/change-rule.0: "upsert after upserting external-dns-secret"
+    kapp.k14s.io/change-rule.1: "upsert after upserting kube-vip"
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m

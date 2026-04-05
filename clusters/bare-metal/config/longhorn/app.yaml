@@ -33,7 +33,8 @@ metadata:
   namespace: bootstrap
   annotations:
     kapp.k14s.io/change-group: longhorn
-    kapp.k14s.io/change-rule: "upsert after upserting longhorn-values"
+    kapp.k14s.io/change-rule.0: "upsert after upserting longhorn-values"
+    kapp.k14s.io/change-rule.1: "upsert after upserting cert-manager"
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m

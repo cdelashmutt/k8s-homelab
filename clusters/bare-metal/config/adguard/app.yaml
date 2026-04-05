@@ -6,7 +6,9 @@ metadata:
   namespace: bootstrap
   annotations:
     kapp.k14s.io/change-group: adguard
-    kapp.k14s.io/change-rule: "upsert after upserting adguard-password"
+    kapp.k14s.io/change-rule.0: "upsert after upserting adguard-password"
+    kapp.k14s.io/change-rule.1: "upsert after upserting kube-vip"
+    kapp.k14s.io/change-rule.2: "upsert after upserting longhorn"
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
