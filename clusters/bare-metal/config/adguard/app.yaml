@@ -33,6 +33,55 @@ spec:
       labels:
         app: adguard
     spec:
+      initContainers:
+      - name: init-config
+        image: httpd:alpine
+        command:
+        - sh
+        - -c
+        - |
+          if [ ! -f /opt/adguardhome/conf/AdGuardHome.yaml ]; then
+            HASH=$(htpasswd -bnBC 10 "" "$(cat /secrets/password)" | tr -d ':\n' | sed 's/^\$2y\$/\$2a\$/')
+            cat > /opt/adguardhome/conf/AdGuardHome.yaml <<EOF
+          bind_host: 0.0.0.0
+          bind_port: 3000
+          users:
+          - name: admin
+            password: "$HASH"
+          auth_attempts: 5
+          block_auth_min: 15
+          dns:
+            bind_hosts:
+            - 0.0.0.0
+            port: 53
+            upstream_dns:
+            - 1.1.1.1
+            - 8.8.8.8
+            bootstrap_dns:
+            - 1.1.1.1
+            - 8.8.8.8
+            protection_enabled: true
+            filtering_enabled: true
+            filters_update_interval: 24
+            querylog_enabled: true
+            querylog_interval: 90
+            statistics_interval: 7
+          filters:
+          - enabled: true
+            url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
+            name: AdGuard DNS filter
+            id: 1
+          dhcp:
+            enabled: false
+          schema_version: 27
+          EOF
+          fi
+        volumeMounts:
+        - name: config
+          mountPath: /opt/adguardhome/conf
+        - name: password
+          mountPath: /secrets
+          readOnly: true
       containers:
       - name: adguard
         image: adguard/adguardhome:v0.107.57
@@ -57,6 +106,9 @@ spec:
           claimName: adguard-config
       - name: work
         emptyDir: {}
+      - name: password
+        secret:
+          secretName: adguard-password
 ---
 # Separate TCP and UDP services are required for DNS — Kubernetes does not
 # support mixed-protocol LoadBalancer services with kube-vip. Both services
