@@ -412,7 +412,7 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "sum(increase(controller_runtime_reconcile_errors_total{controller=\"app\"}[1h]))",
+              "expr": "sum(controller_runtime_reconcile_errors_total{controller=\"app\"}) OR vector(0)",
               "instant": true,
               "refId": "A"
             }
