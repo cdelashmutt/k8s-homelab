@@ -189,6 +189,14 @@
       command: k3s kubectl uncordon {{ ansible_hostname }}
       delegate_to: "{{ groups['k3s_init'][0] }}"
 
+    - name: Recycle Longhorn CSI plugin pod after restart
+      listen: Restart k3s
+      command: >
+        k3s kubectl delete pod -n longhorn-system
+        -l app=longhorn-csi-plugin
+        --field-selector spec.nodeName={{ ansible_hostname }}
+      delegate_to: "{{ groups['k3s_init'][0] }}"
+
     - name: Apply kube-vip DaemonSet manifest
       command: k3s kubectl apply -f /var/lib/rancher/k3s/server/manifests/kube-vip.yaml
 
@@ -265,6 +273,14 @@
     - name: Uncordon node after restart
       listen: Restart k3s
       command: k3s kubectl uncordon {{ ansible_hostname }}
+      delegate_to: "{{ groups['k3s_init'][0] }}"
+
+    - name: Recycle Longhorn CSI plugin pod after restart
+      listen: Restart k3s
+      command: >
+        k3s kubectl delete pod -n longhorn-system
+        -l app=longhorn-csi-plugin
+        --field-selector spec.nodeName={{ ansible_hostname }}
       delegate_to: "{{ groups['k3s_init'][0] }}"
 
 - name: Verify cluster
