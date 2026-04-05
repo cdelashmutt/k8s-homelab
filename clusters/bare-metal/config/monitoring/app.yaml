@@ -106,15 +106,6 @@ spec:
             kind: Namespace
             metadata:
               name: monitoring
-          secretimport.yaml: |
-            ---
-            apiVersion: secretgen.carvel.dev/v1alpha1
-            kind: SecretImport
-            metadata:
-              name: wildcard-tls
-              namespace: monitoring
-            spec:
-              fromNamespace: cert-manager
           kapp-controller-servicemonitor.yaml: |
             ---
             apiVersion: monitoring.coreos.com/v1
