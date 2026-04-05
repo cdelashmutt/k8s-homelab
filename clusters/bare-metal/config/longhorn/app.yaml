@@ -10,7 +10,6 @@ data:
   values.yaml: |
     defaultSettings:
       defaultReplicaCount: 2
-      backupTarget: "nfs://192.168.0.81/mnt/main/longhorn-backups"
     persistence:
       defaultClass: true
       defaultClassReplicaCount: 2
@@ -59,6 +58,17 @@ spec:
             kind: Namespace
             metadata:
               name: longhorn-system
+          backup-target.yaml: |
+            ---
+            apiVersion: longhorn.io/v1beta2
+            kind: BackupTarget
+            metadata:
+              name: default
+              namespace: longhorn-system
+            spec:
+              backupTargetURL: "nfs://192.168.0.81/mnt/main/longhorn-backups"
+              credentialSecret: ""
+              pollInterval: 5m0s
           job-annotations.yaml: |
             #@ load("@ytt:overlay", "overlay")
             #@overlay/match by=overlay.subset({"kind": "Job"}), expects="0+"
