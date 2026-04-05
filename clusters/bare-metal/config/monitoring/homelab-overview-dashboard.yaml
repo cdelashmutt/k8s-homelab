@@ -4,6 +4,8 @@ kind: ConfigMap
 metadata:
   name: homelab-overview-dashboard
   namespace: monitoring
+  annotations:
+    kapp.k14s.io/change-rule: "upsert after upserting monitoring"
   labels:
     grafana_dashboard: "1"
 data:
