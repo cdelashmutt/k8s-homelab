@@ -136,11 +136,14 @@ spec:
             #@overlay/remove
           disable-label-scoping.yaml: |
             #@ load("@ytt:overlay", "overlay")
-            #@ operator_svcs = ["monitoring-kube-prometheus-prometheus", "monitoring-kube-prometheus-alertmanager"]
-            #@ def match_operator_svcs(index, left, right):
-            #@   return left.get("kind") == "Service" and left.get("metadata", {}).get("name") in operator_svcs
-            #@ end
-            #@overlay/match by=match_operator_svcs, expects="0+"
+            #@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "monitoring-kube-prometheus-prometheus"}})
+            ---
+            metadata:
+              #@overlay/match missing_ok=True
+              annotations:
+                #@overlay/match missing_ok=True
+                kapp.k14s.io/disable-label-scoping: ""
+            #@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "monitoring-kube-prometheus-alertmanager"}})
             ---
             metadata:
               #@overlay/match missing_ok=True
