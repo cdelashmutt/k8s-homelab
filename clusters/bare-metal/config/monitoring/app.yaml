@@ -108,5 +108,13 @@ spec:
             #@ load("@ytt:overlay", "overlay")
             #@overlay/match by=overlay.subset({"metadata": {"annotations": {"helm.sh/hook": "test"}}}), expects="0+"
             #@overlay/remove
+          disable-label-scoping.yaml: |
+            #@ load("@ytt:overlay", "overlay")
+            #@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "monitoring-kube-prometheus-prometheus"}})
+            ---
+            metadata:
+              annotations:
+                #@overlay/match missing_ok=True
+                kapp.k14s.io/disable-label-scoping: ""
   deploy:
   - kapp: {}
