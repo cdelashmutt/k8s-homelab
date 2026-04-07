@@ -60,24 +60,25 @@ spec:
                     value: /var/lib/tailscale
                   - name: TS_USERSPACE
                     value: "false"
+                  - name: TS_DEBUG_FIREWALL_MODE
+                    value: auto
+                  - name: POD_NAME
+                    valueFrom:
+                      fieldRef:
+                        fieldPath: metadata.name
+                  - name: POD_UID
+                    valueFrom:
+                      fieldRef:
+                        fieldPath: metadata.uid
                   securityContext:
-                    capabilities:
-                      add:
-                      - NET_ADMIN
-                      - NET_RAW
+                    privileged: true
                   volumeMounts:
                   - name: tailscale-state
                     mountPath: /var/lib/tailscale
-                  - name: dev-tun
-                    mountPath: /dev/net/tun
                 volumes:
                 - name: tailscale-state
                   persistentVolumeClaim:
                     claimName: tailscale-state
-                - name: dev-tun
-                  hostPath:
-                    path: /dev/net/tun
-                    type: CharDevice
   template:
   - ytt: {}
   deploy:
