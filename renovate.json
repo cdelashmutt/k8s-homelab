@@ -76,6 +76,10 @@
       "prBodyNotes": ["⚠️ **After merging:** re-run the Ansible playbook to push the updated DaemonSet manifest to the nodes:\n```\nansible-playbook -i ansible/inventory.ini ansible/install-k3s.yaml\n```"]
     },
     {
+      "matchPackageNames": ["carvel-dev/kapp-controller", "carvel-dev/secretgen-controller"],
+      "prBodyNotes": ["⚠️ **After merging:** re-run `install.sh` to apply the updated manifests to the cluster:\n```\n./install.sh\n```"]
+    },
+    {
       "matchPackageNames": ["longhorn"],
       "matchUpdateTypes": ["minor", "major"],
       "enabled": false,
