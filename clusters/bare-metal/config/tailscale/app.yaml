@@ -58,6 +58,8 @@ spec:
                     value: "192.168.0.0/24"
                   - name: TS_STATE_DIR
                     value: /var/lib/tailscale
+                  - name: TS_KUBE_SECRET
+                    value: ""
                   - name: TS_USERSPACE
                     value: "false"
                   - name: TS_DEBUG_FIREWALL_MODE
