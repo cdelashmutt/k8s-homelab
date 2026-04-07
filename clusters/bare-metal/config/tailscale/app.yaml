@@ -1,0 +1,84 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: tailscale
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: tailscale
+    kapp.k14s.io/change-rule.0: "upsert after upserting tailscale-auth"
+    kapp.k14s.io/change-rule.1: "upsert after upserting longhorn"
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - inline:
+      paths:
+        tailscale.yaml: |
+          ---
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: tailscale-state
+            namespace: tailscale
+          spec:
+            accessModes: [ReadWriteOnce]
+            storageClassName: longhorn
+            resources:
+              requests:
+                storage: 100Mi
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: tailscale-subnet-router
+            namespace: tailscale
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: tailscale-subnet-router
+            strategy:
+              type: Recreate
+            template:
+              metadata:
+                labels:
+                  app: tailscale-subnet-router
+              spec:
+                containers:
+                - name: tailscale
+                  image: ghcr.io/tailscale/tailscale:stable
+                  env:
+                  - name: TS_AUTHKEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: tailscale-auth
+                        key: authkey
+                  - name: TS_ROUTES
+                    value: "192.168.0.0/24"
+                  - name: TS_STATE_DIR
+                    value: /var/lib/tailscale
+                  - name: TS_USERSPACE
+                    value: "false"
+                  securityContext:
+                    capabilities:
+                      add:
+                      - NET_ADMIN
+                      - NET_RAW
+                  volumeMounts:
+                  - name: tailscale-state
+                    mountPath: /var/lib/tailscale
+                  - name: dev-tun
+                    mountPath: /dev/net/tun
+                volumes:
+                - name: tailscale-state
+                  persistentVolumeClaim:
+                    claimName: tailscale-state
+                - name: dev-tun
+                  hostPath:
+                    path: /dev/net/tun
+                    type: CharDevice
+  template:
+  - ytt: {}
+  deploy:
+  - kapp: {}
