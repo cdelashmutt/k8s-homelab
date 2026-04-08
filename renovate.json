@@ -40,7 +40,7 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["/clusters/bare-metal/config/external-dns/deployment\\.yaml/"],
+      "managerFilePatterns": ["/clusters/bare-metal/config/external-dns/app\\.yaml/"],
       "matchStrings": ["image: registry\\.k8s\\.io/external-dns/external-dns:(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)"],
       "depNameTemplate": "registry.k8s.io/external-dns/external-dns",
       "datasourceTemplate": "docker"
