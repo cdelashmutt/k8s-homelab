@@ -1,0 +1,46 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: longhorn-alerts
+  namespace: monitoring
+  annotations:
+    kapp.k14s.io/change-rule: "upsert after upserting monitoring"
+  labels:
+    release: monitoring
+spec:
+  groups:
+  - name: longhorn
+    rules:
+    - alert: LonghornVolumeBackupStale
+      expr: (time() - longhorn_volume_last_backup_at) / 86400 > 8
+      for: 1h
+      labels:
+        severity: warning
+      annotations:
+        summary: "Longhorn volume {{ $labels.volume }} has not been backed up in {{ $value | printf \"%.0f\" }} days"
+        description: "Volume {{ $labels.volume }} last backup is more than 8 days old. Expected weekly backup may have failed or not run."
+    - alert: LonghornVolumeNeverBackedUp
+      expr: longhorn_volume_last_backup_at == 0
+      for: 10d
+      labels:
+        severity: warning
+      annotations:
+        summary: "Longhorn volume {{ $labels.volume }} has never been backed up"
+        description: "Volume {{ $labels.volume }} has no backup on record. Check that the recurring backup job is running."
+    - alert: LonghornDiskSpaceHigh
+      expr: longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes * 100 > 80
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Longhorn disk on {{ $labels.node }} is {{ $value | printf \"%.0f\" }}% full"
+        description: "Longhorn disk {{ $labels.disk }} on node {{ $labels.node }} has exceeded 80% usage."
+    - alert: LonghornDiskSpaceCritical
+      expr: longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes * 100 > 90
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Longhorn disk on {{ $labels.node }} is {{ $value | printf \"%.0f\" }}% full"
+        description: "Longhorn disk {{ $labels.disk }} on node {{ $labels.node }} has exceeded 90% usage."

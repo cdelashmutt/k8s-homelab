@@ -1,0 +1,46 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: harbor-alerts
+  namespace: monitoring
+  annotations:
+    kapp.k14s.io/change-rule: "upsert after upserting monitoring"
+  labels:
+    release: monitoring
+spec:
+  groups:
+  - name: harbor
+    rules:
+    - alert: HarborDown
+      expr: harbor_health == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Harbor is reporting unhealthy"
+        description: "Harbor overall health check has been failing for more than 5 minutes."
+    - alert: HarborComponentDown
+      expr: harbor_up == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Harbor component {{ $labels.job }} is down"
+        description: "Harbor component {{ $labels.job }} has been unreachable for more than 5 minutes."
+    - alert: HarborStorageUsageHigh
+      expr: kubelet_volume_stats_used_bytes{namespace="harbor",persistentvolumeclaim="harbor-registry"} / kubelet_volume_stats_capacity_bytes{namespace="harbor",persistentvolumeclaim="harbor-registry"} * 100 > 80
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Harbor registry storage is {{ $value | printf \"%.0f\" }}% full"
+        description: "Harbor registry PVC usage has exceeded 80% for more than 10 minutes."
+    - alert: HarborStorageUsageCritical
+      expr: kubelet_volume_stats_used_bytes{namespace="harbor",persistentvolumeclaim="harbor-registry"} / kubelet_volume_stats_capacity_bytes{namespace="harbor",persistentvolumeclaim="harbor-registry"} * 100 > 90
+      for: 10m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Harbor registry storage is {{ $value | printf \"%.0f\" }}% full"
+        description: "Harbor registry PVC usage has exceeded 90% for more than 10 minutes."
