@@ -55,8 +55,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": ["/clusters/bare-metal/config/tailscale/app\\.yaml/"],
-      "matchStrings": ["image: ghcr\\.io/tailscale/tailscale:(?<currentValue>[^\\s]+)"],
-      "depNameTemplate": "ghcr.io/tailscale/tailscale",
+      "matchStrings": ["image: docker\\.io/tailscale/tailscale:(?<currentValue>[^\\s]+)"],
+      "depNameTemplate": "tailscale/tailscale",
       "datasourceTemplate": "docker"
     },
     {
@@ -81,6 +81,10 @@
     {
       "matchPackageNames": ["ghcr.io/kube-vip/kube-vip"],
       "prBodyNotes": ["⚠️ **After merging:** re-run the Ansible playbook to push the updated DaemonSet manifest to the nodes:\n```\nansible-playbook -i ansible/inventory.ini ansible/install-k3s.yaml\n```"]
+    },
+    {
+      "matchPackageNames": ["tailscale/tailscale"],
+      "allowedVersions": "/^v\\d+\\.\\d*[02468]\\.\\d+$/"
     },
     {
       "matchPackageNames": ["carvel-dev/kapp-controller", "carvel-dev/secretgen-controller"],
