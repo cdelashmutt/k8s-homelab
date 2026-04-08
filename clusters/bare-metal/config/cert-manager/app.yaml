@@ -19,6 +19,67 @@ spec:
         inline:
           paths: 
             #@yaml/text-templated-strings
+            overlays/servicemonitors.yaml: |
+              ---
+              apiVersion: monitoring.coreos.com/v1
+              kind: ServiceMonitor
+              metadata:
+                name: cert-manager
+                namespace: cert-manager
+                labels:
+                  release: monitoring
+              spec:
+                selector:
+                  matchLabels:
+                    app.kubernetes.io/name: cert-manager
+                    app.kubernetes.io/component: controller
+                namespaceSelector:
+                  matchNames:
+                  - cert-manager
+                endpoints:
+                - port: tcp-prometheus-servicemonitor
+                  path: /metrics
+                  interval: 60s
+              ---
+              apiVersion: monitoring.coreos.com/v1
+              kind: ServiceMonitor
+              metadata:
+                name: cert-manager-cainjector
+                namespace: cert-manager
+                labels:
+                  release: monitoring
+              spec:
+                selector:
+                  matchLabels:
+                    app.kubernetes.io/name: cainjector
+                    app.kubernetes.io/component: cainjector
+                namespaceSelector:
+                  matchNames:
+                  - cert-manager
+                endpoints:
+                - port: http-metrics
+                  path: /metrics
+                  interval: 60s
+              ---
+              apiVersion: monitoring.coreos.com/v1
+              kind: ServiceMonitor
+              metadata:
+                name: cert-manager-webhook
+                namespace: cert-manager
+                labels:
+                  release: monitoring
+              spec:
+                selector:
+                  matchLabels:
+                    app.kubernetes.io/name: webhook
+                    app.kubernetes.io/component: webhook
+                namespaceSelector:
+                  matchNames:
+                  - cert-manager
+                endpoints:
+                - port: metrics
+                  path: /metrics
+                  interval: 60s
             overlays/wildcard-cert.yaml: |
               ---
               apiVersion: cert-manager.io/v1
