@@ -1,3 +1,4 @@
 .sops.yaml
 ansible/ansible-env
 ~/.ansible/vault_pass
+.decrypted~*
