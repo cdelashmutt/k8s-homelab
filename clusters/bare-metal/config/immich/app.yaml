@@ -103,6 +103,9 @@ spec:
             spec:
               instances: 1
               imageName: ghcr.io/tensorchord/cloudnative-vectorchord:16.9-0.4.3
+              postgresql:
+                parameters:
+                  shared_preload_libraries: "vchord"
               storage:
                 size: 10Gi
                 storageClass: longhorn
