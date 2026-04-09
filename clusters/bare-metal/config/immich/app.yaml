@@ -118,7 +118,7 @@ spec:
                   postInitApplicationSQL:
                   - CREATE EXTENSION IF NOT EXISTS vchord CASCADE
                   - CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE
-                  - CREATE EXTENSION IF NOT EXISTS uuid-ossp
+                  - CREATE EXTENSION IF NOT EXISTS "uuid-ossp"
                   - CREATE EXTENSION IF NOT EXISTS unaccent
                   - CREATE EXTENSION IF NOT EXISTS pg_trgm
   deploy:
