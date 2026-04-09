@@ -73,6 +73,8 @@ spec:
             kind: PersistentVolume
             metadata:
               name: paperless-consume-pv
+              annotations:
+                kapp.k14s.io/update-strategy: skip
             spec:
               capacity:
                 storage: 10Gi
@@ -93,6 +95,7 @@ spec:
               namespace: paperless
               annotations:
                 kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+                kapp.k14s.io/update-strategy: skip
             spec:
               accessModes:
               - ReadWriteMany
@@ -106,6 +109,8 @@ spec:
             kind: PersistentVolume
             metadata:
               name: paperless-media-pv
+              annotations:
+                kapp.k14s.io/update-strategy: skip
             spec:
               capacity:
                 storage: 40Gi
@@ -126,6 +131,7 @@ spec:
               namespace: paperless
               annotations:
                 kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+                kapp.k14s.io/update-strategy: skip
             spec:
               accessModes:
               - ReadWriteMany

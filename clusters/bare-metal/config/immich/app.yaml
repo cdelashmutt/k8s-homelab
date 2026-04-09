@@ -63,6 +63,8 @@ spec:
             kind: PersistentVolume
             metadata:
               name: immich-library-pv
+              annotations:
+                kapp.k14s.io/update-strategy: skip
             spec:
               capacity:
                 storage: 500Gi
@@ -83,6 +85,7 @@ spec:
               namespace: immich
               annotations:
                 kapp.k14s.io/change-rule: "upsert after upserting immich-namespace"
+                kapp.k14s.io/update-strategy: skip
             spec:
               accessModes:
               - ReadWriteMany
