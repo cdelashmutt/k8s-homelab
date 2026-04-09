@@ -39,6 +39,12 @@ spec:
   - ytt:
       inline:
         paths:
+          namespace.yaml: |
+            ---
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: cnpg-system
           disable-label-scoping.yaml: |
             #@ load("@ytt:overlay", "overlay")
             #@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"namespace": "cnpg-system"}}), expects="0+"
