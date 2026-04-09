@@ -1,0 +1,116 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: immich
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: immich
+    kapp.k14s.io/change-rule.0: "upsert after upserting immich-values"
+    kapp.k14s.io/change-rule.1: "upsert after upserting cloudnative-pg"
+    kapp.k14s.io/change-rule.2: "upsert after upserting cert-manager"
+    kapp.k14s.io/change-rule.3: "upsert after upserting longhorn"
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - helmChart:
+      name: immich
+      version: "0.11.1"
+      repository:
+        url: https://immich-app.github.io/immich-charts
+  template:
+  - helmTemplate:
+      namespace: immich
+      valuesFrom:
+      - secretRef:
+          name: immich-values
+  - ytt:
+      inline:
+        paths:
+          namespace.yaml: |
+            ---
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: immich
+              annotations:
+                kapp.k14s.io/change-group: immich-namespace
+          secretimports.yaml: |
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: wildcard-tls
+              namespace: immich
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting immich-namespace"
+            spec:
+              fromNamespace: cert-manager
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: immich-db-credentials
+              namespace: immich
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting immich-namespace"
+            spec:
+              fromNamespace: bootstrap
+          nfs-pv.yaml: |
+            ---
+            apiVersion: v1
+            kind: PersistentVolume
+            metadata:
+              name: immich-library-pv
+            spec:
+              capacity:
+                storage: 500Gi
+              accessModes:
+              - ReadWriteMany
+              nfs:
+                server: 192.168.0.81
+                path: /mnt/main/Photos
+              persistentVolumeReclaimPolicy: Retain
+              claimRef:
+                name: immich-library-pvc
+                namespace: immich
+            ---
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: immich-library-pvc
+              namespace: immich
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting immich-namespace"
+            spec:
+              accessModes:
+              - ReadWriteMany
+              resources:
+                requests:
+                  storage: 500Gi
+              volumeName: immich-library-pv
+              storageClassName: ""
+          cnpg-cluster.yaml: |
+            ---
+            apiVersion: postgresql.cnpg.io/v1
+            kind: Cluster
+            metadata:
+              name: immich-db
+              namespace: immich
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting immich-namespace"
+            spec:
+              instances: 1
+              imageName: ghcr.io/tensorchord/cloudnative-vectorchord:16.9-0.4.3
+              storage:
+                size: 10Gi
+                storageClass: longhorn
+              bootstrap:
+                initdb:
+                  database: immich
+                  owner: immich
+                  secret:
+                    name: immich-db-credentials
+  deploy:
+  - kapp: {}

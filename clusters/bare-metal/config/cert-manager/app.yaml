@@ -104,6 +104,7 @@ spec:
                 toNamespaces:
                   - harbor
                   - kube-system
+                  - immich
             overlays/lets-encrypt.yaml: |
               ---
               apiVersion: v1
