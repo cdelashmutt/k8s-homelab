@@ -28,6 +28,16 @@ spec:
   - ytt:
       inline:
         paths:
+          set-namespace.yaml: |
+            #@ load("@ytt:overlay", "overlay")
+            #@ namespaced_kinds = ["Deployment", "StatefulSet", "DaemonSet", "Service", "ServiceAccount", "ConfigMap", "Secret", "PersistentVolumeClaim", "Ingress", "Role", "RoleBinding", "HorizontalPodAutoscaler", "PodDisruptionBudget", "NetworkPolicy"]
+            #@ for kind in namespaced_kinds:
+            #@overlay/match by=overlay.subset({"kind": kind}), expects="0+"
+            ---
+            metadata:
+              #@overlay/match missing_ok=True
+              namespace: paperless
+            #@ end
           namespace.yaml: |
             ---
             apiVersion: v1
