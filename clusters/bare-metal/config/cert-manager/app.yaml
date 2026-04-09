@@ -105,6 +105,7 @@ spec:
                   - harbor
                   - kube-system
                   - immich
+                  - paperless
             overlays/lets-encrypt.yaml: |
               ---
               apiVersion: v1

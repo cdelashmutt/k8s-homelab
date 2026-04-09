@@ -1,0 +1,218 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: paperless
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: paperless
+    kapp.k14s.io/change-rule.0: "upsert after upserting paperless-values"
+    kapp.k14s.io/change-rule.1: "upsert after upserting cloudnative-pg"
+    kapp.k14s.io/change-rule.2: "upsert after upserting cert-manager"
+    kapp.k14s.io/change-rule.3: "upsert after upserting longhorn"
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - helmChart:
+      name: paperless
+      version: "10.21.0"
+      repository:
+        url: https://zekker6.github.io/helm-charts
+  template:
+  - helmTemplate:
+      namespace: paperless
+      valuesFrom:
+      - secretRef:
+          name: paperless-values
+  - ytt:
+      inline:
+        paths:
+          namespace.yaml: |
+            ---
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: paperless
+              annotations:
+                kapp.k14s.io/change-group: paperless-namespace
+          secretimports.yaml: |
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: wildcard-tls
+              namespace: paperless
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+            spec:
+              fromNamespace: cert-manager
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: paperless-db-credentials
+              namespace: paperless
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+            spec:
+              fromNamespace: bootstrap
+          nfs-pvs.yaml: |
+            ---
+            apiVersion: v1
+            kind: PersistentVolume
+            metadata:
+              name: paperless-consume-pv
+            spec:
+              capacity:
+                storage: 10Gi
+              accessModes:
+              - ReadWriteMany
+              nfs:
+                server: 192.168.0.81
+                path: /mnt/main/Documents/inbox
+              persistentVolumeReclaimPolicy: Retain
+              claimRef:
+                name: paperless-consume-pvc
+                namespace: paperless
+            ---
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: paperless-consume-pvc
+              namespace: paperless
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+            spec:
+              accessModes:
+              - ReadWriteMany
+              resources:
+                requests:
+                  storage: 10Gi
+              volumeName: paperless-consume-pv
+              storageClassName: ""
+            ---
+            apiVersion: v1
+            kind: PersistentVolume
+            metadata:
+              name: paperless-media-pv
+            spec:
+              capacity:
+                storage: 40Gi
+              accessModes:
+              - ReadWriteMany
+              nfs:
+                server: 192.168.0.81
+                path: /mnt/main/Documents/paperless
+              persistentVolumeReclaimPolicy: Retain
+              claimRef:
+                name: paperless-media-pvc
+                namespace: paperless
+            ---
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: paperless-media-pvc
+              namespace: paperless
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+            spec:
+              accessModes:
+              - ReadWriteMany
+              resources:
+                requests:
+                  storage: 40Gi
+              volumeName: paperless-media-pv
+              storageClassName: ""
+            ---
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: paperless-data-pvc
+              namespace: paperless
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+            spec:
+              accessModes:
+              - ReadWriteOnce
+              storageClassName: longhorn
+              resources:
+                requests:
+                  storage: 5Gi
+            ---
+            apiVersion: v1
+            kind: PersistentVolumeClaim
+            metadata:
+              name: paperless-export-pvc
+              namespace: paperless
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+            spec:
+              accessModes:
+              - ReadWriteOnce
+              storageClassName: longhorn
+              resources:
+                requests:
+                  storage: 5Gi
+          redis.yaml: |
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: paperless-redis
+              namespace: paperless
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: paperless-redis
+              template:
+                metadata:
+                  labels:
+                    app: paperless-redis
+                spec:
+                  containers:
+                  - name: redis
+                    image: redis:7-alpine
+                    ports:
+                    - containerPort: 6379
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: paperless-redis
+              namespace: paperless
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+                kapp.k14s.io/disable-label-scoping: ""
+            spec:
+              selector:
+                app: paperless-redis
+              ports:
+              - port: 6379
+                targetPort: 6379
+          cnpg-cluster.yaml: |
+            ---
+            apiVersion: postgresql.cnpg.io/v1
+            kind: Cluster
+            metadata:
+              name: paperless-db
+              namespace: paperless
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+            spec:
+              instances: 1
+              imageName: ghcr.io/cloudnative-pg/postgresql:17
+              storage:
+                size: 5Gi
+                storageClass: longhorn
+              bootstrap:
+                initdb:
+                  database: paperless
+                  owner: paperless
+                  secret:
+                    name: paperless-db-credentials
+  deploy:
+  - kapp: {}
