@@ -106,7 +106,6 @@ spec:
               postgresql:
                 shared_preload_libraries:
                 - vchord
-                - vector
               storage:
                 size: 10Gi
                 storageClass: longhorn
@@ -118,6 +117,9 @@ spec:
                     name: immich-db-credentials
                   postInitApplicationSQL:
                   - CREATE EXTENSION IF NOT EXISTS vchord CASCADE
-                  - CREATE EXTENSION IF NOT EXISTS vector CASCADE
+                  - CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE
+                  - CREATE EXTENSION IF NOT EXISTS uuid-ossp
+                  - CREATE EXTENSION IF NOT EXISTS unaccent
+                  - CREATE EXTENSION IF NOT EXISTS pg_trgm
   deploy:
   - kapp: {}
