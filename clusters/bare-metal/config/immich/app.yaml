@@ -112,5 +112,8 @@ spec:
                   owner: immich
                   secret:
                     name: immich-db-credentials
+                  postInitApplicationSQL:
+                  - CREATE EXTENSION IF NOT EXISTS vchord CASCADE
+                  - CREATE EXTENSION IF NOT EXISTS vector CASCADE
   deploy:
   - kapp: {}
