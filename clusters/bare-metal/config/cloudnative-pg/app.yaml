@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudnative-pg-values
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: cloudnative-pg-values
+data:
+  values.yaml: |
+    monitoring:
+      podMonitorEnabled: true
+      podMonitorAdditionalLabels:
+        release: monitoring
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: cloudnative-pg
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: cloudnative-pg
+    kapp.k14s.io/change-rule: "upsert after upserting cloudnative-pg-values"
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - helmChart:
+      name: cloudnative-pg
+      version: "0.28.0"
+      repository:
+        url: https://cloudnative-pg.github.io/charts
+  template:
+  - helmTemplate:
+      namespace: cnpg-system
+      valuesFrom:
+      - configMapRef:
+          name: cloudnative-pg-values
+  - ytt:
+      inline:
+        paths:
+          disable-label-scoping.yaml: |
+            #@ load("@ytt:overlay", "overlay")
+            #@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"namespace": "cnpg-system"}}), expects="0+"
+            ---
+            metadata:
+              #@overlay/match missing_ok=True
+              annotations:
+                #@overlay/match missing_ok=True
+                kapp.k14s.io/disable-label-scoping: ""
+  deploy:
+  - kapp:
+      rawOptions:
+      - --apply-default-update-strategy=fallback-on-replace
