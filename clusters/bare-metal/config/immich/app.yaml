@@ -36,6 +36,20 @@ spec:
               name: immich
               annotations:
                 kapp.k14s.io/change-group: immich-namespace
+          serverstransport.yaml: |
+            ---
+            apiVersion: traefik.io/v1alpha1
+            kind: ServersTransport
+            metadata:
+              name: immich-transport
+              namespace: immich
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting immich-namespace"
+            spec:
+              forwardingTimeouts:
+                responseHeaderTimeout: 600s
+                dialTimeout: 30s
+                idleConnTimeout: 90s
           secretimports.yaml: |
             ---
             apiVersion: secretgen.carvel.dev/v1alpha1
