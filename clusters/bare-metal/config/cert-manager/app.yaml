@@ -12,7 +12,7 @@ spec:
   syncPeriod: 10m
   fetch:
     - http:
-        url: https://github.com/cert-manager/cert-manager/releases/download/v1.20.1/cert-manager.yaml
+        url: https://github.com/cert-manager/cert-manager/releases/download/v1.20.2/cert-manager.yaml
   template:
     - ytt:
         strict: true
