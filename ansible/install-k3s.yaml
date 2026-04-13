@@ -1,4 +1,14 @@
 ---
+- name: Base node configuration
+  hosts: k8s
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Set timezone
+      community.general.timezone:
+        name: America/New_York
+
 - name: Initialize first k3s server node (embedded etcd)
   hosts: k3s_init
   gather_facts: true
