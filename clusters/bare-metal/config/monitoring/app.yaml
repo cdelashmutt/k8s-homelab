@@ -24,7 +24,7 @@ data:
       sidecar:
         datasources:
           enabled: true
-    kubeStateMetrics:
+    kube-state-metrics:
       rbac:
         extraRules:
           - apiGroups:
