@@ -10,6 +10,7 @@ data:
   values.yaml: |
     defaultSettings:
       defaultReplicaCount: 2
+      concurrentAutomaticEngineUpgradePerNodeLimit: 1
     persistence:
       defaultClass: true
       defaultClassReplicaCount: 2
