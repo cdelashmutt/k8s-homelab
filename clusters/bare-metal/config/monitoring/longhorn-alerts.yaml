@@ -36,6 +36,14 @@ spec:
       annotations:
         summary: "Longhorn disk on {{ $labels.node }} is {{ $value | printf \"%.0f\" }}% full"
         description: "Longhorn disk {{ $labels.disk }} on node {{ $labels.node }} has exceeded 80% usage."
+    - alert: LonghornStaleEngineImages
+      expr: count(longhorn_engine_image_ref_count == 0) >= 2
+      for: 1h
+      labels:
+        severity: warning
+      annotations:
+        summary: "{{ $value }} stale Longhorn engine images need cleanup"
+        description: "{{ $value }} engine images have refCount 0 (no volumes using them). Keep at most 1 previous version. Clean up with: kubectl get engineimage -n longhorn-system && kubectl delete engineimage <name> -n longhorn-system"
     - alert: LonghornDiskSpaceCritical
       expr: longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes * 100 > 90
       for: 10m

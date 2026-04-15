@@ -24,6 +24,33 @@ data:
       sidecar:
         datasources:
           enabled: true
+    kubeStateMetrics:
+      rbac:
+        extraRules:
+          - apiGroups:
+              - longhorn.io
+            resources:
+              - engineimages
+            verbs:
+              - list
+              - watch
+      customResourceState:
+        enabled: true
+        config:
+          spec:
+            resources:
+              - groupVersionKind:
+                  group: longhorn.io
+                  version: v1beta2
+                  kind: EngineImage
+                metricNamePrefix: longhorn_engine_image
+                metrics:
+                  - name: ref_count
+                    help: "Number of volumes using this engine image"
+                    each:
+                      type: Gauge
+                      gauge:
+                        path: [status, refCount]
     kubeControllerManager:
       enabled: false
     kubeScheduler:

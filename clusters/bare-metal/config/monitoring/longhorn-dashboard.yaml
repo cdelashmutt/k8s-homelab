@@ -2674,6 +2674,90 @@ data:
             "align": false,
             "alignLevel": null
           }
+        },
+        {
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 133
+          },
+          "id": 57,
+          "options": {
+            "content": "<div class=\"dashboard-header text-center\">\n<span>ENGINE IMAGES</span>\n</div>",
+            "mode": "html"
+          },
+          "pluginVersion": "7.1.0",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "",
+          "transparent": true,
+          "type": "text"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Number of Longhorn engine images with no volumes using them. Values >= 2 indicate stale images that should be cleaned up.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 0,
+            "y": 136
+          },
+          "id": 58,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "7.1.0",
+          "targets": [
+            {
+              "expr": "count(longhorn_engine_image_ref_count == 0) or vector(0)",
+              "interval": "",
+              "legendFormat": "Stale Engine Images",
+              "refId": "A"
+            }
+          ],
+          "title": "Stale Engine Images",
+          "type": "stat"
         }
       ],
       "refresh": "5s",
