@@ -113,7 +113,7 @@ spec:
   fetch:
   - helmChart:
       name: kube-prometheus-stack
-      version: "83.4.2"
+      version: "83.5.0"
       repository:
         url: https://prometheus-community.github.io/helm-charts
   template:
