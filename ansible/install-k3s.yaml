@@ -15,9 +15,33 @@
         content: "blacklist mei_me\n"
       notify: Update initramfs
 
+    - name: Remove quiet splash from grub for visible boot messages
+      lineinfile:
+        path: /etc/default/grub
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT=""'
+      notify: Update grub
+
+    - name: Configure networkd-wait-online to wait for any interface
+      copy:
+        dest: /etc/systemd/system/systemd-networkd-wait-online.service.d/wait-any.conf
+        content: |
+          [Service]
+          ExecStart=
+          ExecStart=/lib/systemd/systemd-networkd-wait-online --any
+        mode: '0644'
+      notify: Reload systemd
+
   handlers:
     - name: Update initramfs
       command: update-initramfs -u
+
+    - name: Update grub
+      command: update-grub
+
+    - name: Reload systemd
+      systemd:
+        daemon_reload: true
 
 - name: Initialize first k3s server node (embedded etcd)
   hosts: k3s_init
