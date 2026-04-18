@@ -13,7 +13,7 @@
       lineinfile:
         path: /etc/default/grub
         regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
-        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash reboot=pci"'
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash reboot=bios"'
       notify: Update grub
 
   handlers:
