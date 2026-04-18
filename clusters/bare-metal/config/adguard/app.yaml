@@ -133,6 +133,7 @@ spec:
             namespace: adguard
             annotations:
               metallb.universe.tf/loadBalancerIPs: 192.168.0.51
+              metallb.universe.tf/allow-shared-ip: adguard-dns
           spec:
             type: LoadBalancer
             selector:
@@ -150,6 +151,7 @@ spec:
             namespace: adguard
             annotations:
               metallb.universe.tf/loadBalancerIPs: 192.168.0.51
+              metallb.universe.tf/allow-shared-ip: adguard-dns
           spec:
             type: LoadBalancer
             selector:
