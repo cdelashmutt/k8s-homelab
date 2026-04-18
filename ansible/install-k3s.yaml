@@ -9,16 +9,15 @@
       community.general.timezone:
         name: America/New_York
 
-    - name: Set reboot=pci kernel parameter for NUC6 reboot reliability
-      lineinfile:
-        path: /etc/default/grub
-        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
-        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash reboot=bios"'
-      notify: Update grub
+    - name: Blacklist mei_me to prevent NUC6 reboot hang
+      copy:
+        dest: /etc/modprobe.d/blacklist-mei.conf
+        content: "blacklist mei_me\n"
+      notify: Update initramfs
 
   handlers:
-    - name: Update grub
-      command: update-grub
+    - name: Update initramfs
+      command: update-initramfs -u
 
 - name: Initialize first k3s server node (embedded etcd)
   hosts: k3s_init
