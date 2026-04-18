@@ -12,7 +12,7 @@ data:
       # Only reboot during this window to avoid unexpected disruptions
       rebootDays: [sa]
       startTime: "02:00"
-      endTime: "23:59"
+      endTime: "06:00"
       # Reboot one node at a time (Kubernetes drain handled by kured)
       concurrency: 1
       # Required to drain past Longhorn instance-manager PodDisruptionBudgets
