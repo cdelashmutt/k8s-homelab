@@ -1,42 +1,68 @@
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metallb-values
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: metallb-values
+data:
+  values.yaml: |
+    speaker:
+      frr:
+        enabled: false
+---
 apiVersion: kappctrl.k14s.io/v1alpha1
 kind: App
 metadata:
-  name: kube-vip-cloud-provider
+  name: metallb
   namespace: bootstrap
   annotations:
-    kapp.k14s.io/change-group: kube-vip
+    kapp.k14s.io/change-group: metallb
+    kapp.k14s.io/change-rule: "upsert after upserting metallb-values"
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
   fetch:
   - helmChart:
-      name: kube-vip-cloud-provider
-      version: "0.2.10"
+      name: metallb
+      version: "0.15.3"
       repository:
-        url: https://kube-vip.github.io/helm-charts
+        url: https://metallb.github.io/metallb
   template:
   - helmTemplate:
-      namespace: kube-system
-      values:
-      - |
-        config:
-          range-global: 192.168.0.50-192.168.0.59
+      namespace: metallb-system
+      valuesFrom:
+      - configMapRef:
+          name: metallb-values
   - ytt:
       inline:
         paths:
-          ip-pool.yaml: |
+          namespace.yaml: |
             ---
             apiVersion: v1
-            kind: ConfigMap
+            kind: Namespace
             metadata:
-              name: kube-vip-cloud-provider
-              namespace: kube-system
-            data:
-              range-global: 192.168.0.50-192.168.0.59
-          remove-helm-tests.yaml: |
-            #@ load("@ytt:overlay", "overlay")
-            #@overlay/match by=overlay.subset({"metadata": {"annotations": {"helm.sh/hook": "test"}}}), expects="0+"
-            #@overlay/remove
+              name: metallb-system
+          ip-pool.yaml: |
+            ---
+            apiVersion: metallb.io/v1beta1
+            kind: IPAddressPool
+            metadata:
+              name: default-pool
+              namespace: metallb-system
+            spec:
+              addresses:
+              - 192.168.0.50-192.168.0.59
+          l2-advertisement.yaml: |
+            ---
+            apiVersion: metallb.io/v1beta1
+            kind: L2Advertisement
+            metadata:
+              name: default
+              namespace: metallb-system
+            spec:
+              ipAddressPools:
+              - default-pool
   deploy:
   - kapp: {}
