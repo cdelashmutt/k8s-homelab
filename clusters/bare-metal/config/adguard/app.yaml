@@ -7,7 +7,7 @@ metadata:
   annotations:
     kapp.k14s.io/change-group: adguard
     kapp.k14s.io/change-rule.0: "upsert after upserting adguard-password"
-    kapp.k14s.io/change-rule.1: "upsert after upserting kube-vip"
+    kapp.k14s.io/change-rule.1: "upsert after upserting metallb"
     kapp.k14s.io/change-rule.2: "upsert after upserting longhorn"
 spec:
   serviceAccountName: bootstrap
@@ -124,7 +124,7 @@ spec:
                   secret:
                     secretName: adguard-password
           ---
-          # Separate TCP and UDP services required — kube-vip does not support
+          # Separate TCP and UDP services required — MetalLB does not support
           # mixed-protocol LoadBalancer services. Both get the same explicit IP.
           apiVersion: v1
           kind: Service
@@ -132,7 +132,7 @@ spec:
             name: adguard-dns-tcp
             namespace: adguard
             annotations:
-              kube-vip.io/loadbalancerIPs: 192.168.0.51
+              metallb.universe.tf/loadBalancerIPs: 192.168.0.51
           spec:
             type: LoadBalancer
             selector:
@@ -149,7 +149,7 @@ spec:
             name: adguard-dns-udp
             namespace: adguard
             annotations:
-              kube-vip.io/loadbalancerIPs: 192.168.0.51
+              metallb.universe.tf/loadBalancerIPs: 192.168.0.51
           spec:
             type: LoadBalancer
             selector:
