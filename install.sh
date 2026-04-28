@@ -29,7 +29,7 @@ kubectl create namespace bootstrap --dry-run=client -o yaml | kubectl apply -f-
 
 kubectl create secret generic -n bootstrap age-secrets --from-file=key.txt=$HOME/.config/sops/age/keys.txt --dry-run=client -o yaml | kubectl apply -f-
 
-kapp deploy -a kc -f https://github.com/carvel-dev/kapp-controller/releases/download/v0.59.7/release.yml -f- --yes << EOF
+kapp deploy -a kc -f https://github.com/carvel-dev/kapp-controller/releases/download/v0.59.8/release.yml -f- --yes << EOF
 apiVersion: v1
 kind: Secret
 metadata:
