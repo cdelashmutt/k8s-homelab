@@ -81,7 +81,7 @@ Never `systemctl restart k3s` directly — it corrupts iptables and leaves stale
 
 ## Longhorn
 
-- Drain requires `--disable-eviction` to bypass instance-manager PodDisruptionBudgets
+- Drain requires `--disable-eviction` to bypass instance-manager PodDisruptionBudgets (kubectl only; kured does not support this flag — use `forceReboot: true` + `drainTimeout: 5m` in kured config instead)
 - After k3s restart, the Longhorn CSI plugin DaemonSet pod must be deleted and recreated (it survives drain with a stale network namespace)
 - RWX volumes are served by a share-manager pod that won't start if the volume's replica is still rebuilding (2-minute retry backoff)
 

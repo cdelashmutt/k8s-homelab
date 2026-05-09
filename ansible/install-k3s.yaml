@@ -163,6 +163,7 @@
           disable:
             - servicelb
           node-ip: "{{ node_ip }}"
+          flannel-iface: "{{ ansible_default_ipv4.interface }}"
       notify: Restart k3s
 
     - name: Install k3s on init node
@@ -262,6 +263,7 @@
           disable:
             - servicelb
           node-ip: "{{ node_ip }}"
+          flannel-iface: "{{ ansible_default_ipv4.interface }}"
       notify: Restart k3s
 
     - name: Join node to k3s cluster
