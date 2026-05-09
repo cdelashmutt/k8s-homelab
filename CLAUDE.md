@@ -89,7 +89,8 @@ Never `systemctl restart k3s` directly — it corrupts iptables and leaves stale
 
 - kube-vip runs as a DaemonSet (hostNetwork: true) and manages the control-plane VIP **and** LoadBalancer service IPs
 - k3s addon controller manages `/var/lib/rancher/k3s/server/manifests/kube-vip.yaml` but reconciles unreliably at runtime — the Ansible handler does a direct `kubectl apply` when the manifest changes
-- flannel reads node IPs from NIC addresses; without `node-ip` set in k3s config, flannel picks up the kube-vip VIP as the node's public IP, causing VxLAN misrouting
+- flannel is configured with `flannel-backend: host-gw` (direct L3 routing, no VxLAN) — all nodes are on the same L2 subnet (192.168.0.0/24) so this works and avoids the kube-vip VIP race condition that plagued VxLAN mode (kube-vip adding the VIP to eno1 before flannel initialized caused flannel to pick the VIP as its VxLAN local IP)
+- `node-ip` must be set in k3s config on each node to the physical NIC IP so flannel annotates the node correctly; without it flannel may pick up the kube-vip VIP
 - **LoadBalancer services require the `kube-vip.io/loadbalancerIPs` annotation** to get a specific IP — `spec.loadBalancerIP` is deprecated and ignored in k8s 1.24+
 - The kube-vip IP pool is configured via a ConfigMap named `kube-vip-cloud-provider` in `kube-system` — managed explicitly in `kube-vip/app.yaml` via ytt inline (the helm chart does not create it)
 - The `system:kube-vip-role` ClusterRole must include `services/status` in its resources or kube-vip cannot set LoadBalancer IPs on services in non-kube-system namespaces

@@ -22,6 +22,12 @@
         line: 'GRUB_CMDLINE_LINUX_DEFAULT=""'
       notify: Update grub
 
+    - name: Create systemd-networkd-wait-online drop-in directory
+      file:
+        path: /etc/systemd/system/systemd-networkd-wait-online.service.d
+        state: directory
+        mode: '0755'
+
     - name: Configure networkd-wait-online to wait for any interface
       copy:
         dest: /etc/systemd/system/systemd-networkd-wait-online.service.d/wait-any.conf
@@ -163,7 +169,7 @@
           disable:
             - servicelb
           node-ip: "{{ node_ip }}"
-          flannel-iface: "{{ ansible_default_ipv4.interface }}"
+          flannel-backend: host-gw
       notify: Restart k3s
 
     - name: Install k3s on init node
@@ -263,7 +269,7 @@
           disable:
             - servicelb
           node-ip: "{{ node_ip }}"
-          flannel-iface: "{{ ansible_default_ipv4.interface }}"
+          flannel-backend: host-gw
       notify: Restart k3s
 
     - name: Join node to k3s cluster
