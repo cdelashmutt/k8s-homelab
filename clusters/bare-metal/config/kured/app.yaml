@@ -15,8 +15,10 @@ data:
       endTime: "06:00"
       # Reboot one node at a time (Kubernetes drain handled by kured)
       concurrency: 1
-      # Required to drain past Longhorn instance-manager PodDisruptionBudgets
-      drainDisableEviction: true
+    # Required to drain past Longhorn instance-manager PodDisruptionBudgets
+    # drainDisableEviction is not a valid chart key; must use extraArgs instead
+    extraArgs:
+      drain-disable-eviction: ""
 ---
 apiVersion: kappctrl.k14s.io/v1alpha1
 kind: App
