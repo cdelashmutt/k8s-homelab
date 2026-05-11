@@ -27,7 +27,7 @@ spec:
   fetch:
   - helmChart:
       name: cloudnative-pg
-      version: "0.28.0"
+      version: "0.28.1"
       repository:
         url: https://cloudnative-pg.github.io/charts
   template:
