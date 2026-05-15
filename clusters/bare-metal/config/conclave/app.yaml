@@ -1,3 +1,52 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:json", "json")
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: conclave
+  annotations:
+    kapp.k14s.io/change-group: conclave-namespace
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: conclave-db-secret
+  namespace: conclave
+  annotations:
+    kapp.k14s.io/change-group: conclave-db-secret
+    kapp.k14s.io/change-rule: "upsert after upserting conclave-namespace"
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: #@ data.values.conclave.dbPassword
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: conclave-backend-secret
+  namespace: conclave
+  annotations:
+    kapp.k14s.io/change-group: conclave-backend-secret
+    kapp.k14s.io/change-rule: "upsert after upserting conclave-namespace"
+type: Opaque
+stringData:
+  DB_PASSWORD: #@ data.values.conclave.dbPassword
+  JWT_SECRET: #@ data.values.conclave.jwtSecret
+  ICLOUD_EMAIL: #@ data.values.conclave.icloudEmail
+  ICLOUD_APP_PASSWORD: #@ data.values.conclave.icloudAppPassword
+---
+# Classic PAT required — fine-grained tokens do not support package registry access
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ghcr-pull-secret
+  namespace: conclave
+  annotations:
+    kapp.k14s.io/change-group: conclave-ghcr-pull-secret
+    kapp.k14s.io/change-rule: "upsert after upserting conclave-namespace"
+type: kubernetes.io/dockerconfigjson
+stringData:
+  .dockerconfigjson: #@ json.encode({"auths": {"ghcr.io": {"username": "cdelashmutt", "password": data.values.conclave.ghcrPat}}})
 ---
 apiVersion: kappctrl.k14s.io/v1alpha1
 kind: App
