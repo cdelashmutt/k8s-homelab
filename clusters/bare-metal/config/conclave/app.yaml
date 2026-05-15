@@ -35,6 +35,7 @@ stringData:
   ICLOUD_EMAIL: #@ data.values.conclave.icloudEmail
   ICLOUD_APP_PASSWORD: #@ data.values.conclave.icloudAppPassword
   MAIL_FROM: #@ data.values.conclave.mailFrom
+  ALLOWED_EMAILS: #@ data.values.conclave.allowedEmails
 ---
 # Classic PAT required — fine-grained tokens do not support package registry access
 apiVersion: v1
