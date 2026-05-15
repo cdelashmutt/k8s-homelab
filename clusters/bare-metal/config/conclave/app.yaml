@@ -71,6 +71,13 @@ spec:
         name: conclave-git-auth
       subPath: k8s
   template:
-  - ytt: {}
+  - ytt:
+      inline:
+        paths:
+          overlay.yaml: |
+            #@ load("@ytt:overlay", "overlay")
+            #@overlay/match by=overlay.subset({"kind": "Namespace", "metadata": {"name": "conclave"}}), expects="0+"
+            #@overlay/remove
+            ---
   deploy:
   - kapp: {}
