@@ -1,0 +1,27 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: conclave
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: conclave
+    kapp.k14s.io/change-rule.0: "upsert after upserting conclave-git-auth"
+    kapp.k14s.io/change-rule.1: "upsert after upserting conclave-namespace"
+    kapp.k14s.io/change-rule.2: "upsert after upserting conclave-db-secret"
+    kapp.k14s.io/change-rule.3: "upsert after upserting conclave-backend-secret"
+    kapp.k14s.io/change-rule.4: "upsert after upserting conclave-ghcr-pull-secret"
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 5m
+  fetch:
+  - git:
+      url: https://github.com/cdelashmutt/conclave
+      ref: origin/main
+      secretRef:
+        name: conclave-git-auth
+      subPath: k8s
+  template:
+  - ytt: {}
+  deploy:
+  - kapp: {}
