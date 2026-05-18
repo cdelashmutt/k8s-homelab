@@ -32,9 +32,11 @@ type: Opaque
 stringData:
   DB_PASSWORD: #@ data.values.conclave.dbPassword
   JWT_SECRET: #@ data.values.conclave.jwtSecret
-  ICLOUD_EMAIL: #@ data.values.conclave.icloudEmail
-  ICLOUD_APP_PASSWORD: #@ data.values.conclave.icloudAppPassword
+  SMTP_USER: #@ data.values.conclave.smtpUser
+  SMTP_PASSWORD: #@ data.values.conclave.smtpPassword
   MAIL_FROM: #@ data.values.conclave.mailFrom
+  MAIL_HOST: #@ data.values.conclave.mailHost
+  MAIL_PORT: #@ data.values.conclave.mailPort
   ALLOWED_EMAILS: #@ data.values.conclave.allowedEmails
 ---
 # Classic PAT required — fine-grained tokens do not support package registry access
