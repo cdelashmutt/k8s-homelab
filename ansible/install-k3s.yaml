@@ -38,6 +38,33 @@
         mode: '0644'
       notify: Reload systemd
 
+    - name: Create kvip macvlan systemd service
+      copy:
+        dest: /etc/systemd/system/kvip-macvlan.service
+        content: |
+          [Unit]
+          Description=Create kvip macvlan interface for kube-vip
+          After=network.target
+          Before=k3s.service
+
+          [Service]
+          Type=oneshot
+          RemainAfterExit=yes
+          ExecStart=/bin/sh -c 'ip link show kvip 2>/dev/null || ip link add kvip link eno1 type macvlan mode bridge'
+          ExecStart=/sbin/ip link set kvip up
+
+          [Install]
+          WantedBy=multi-user.target
+        mode: '0644'
+      register: kvip_service_file
+
+    - name: Enable and start kvip-macvlan service
+      systemd:
+        name: kvip-macvlan
+        enabled: true
+        state: started
+        daemon_reload: "{{ kvip_service_file.changed }}"
+
   handlers:
     - name: Update initramfs
       command: update-initramfs -u
@@ -131,7 +158,7 @@
                   - name: port
                     value: "6443"
                   - name: vip_interface
-                    value: "{{ ansible_default_ipv4.interface }}"
+                    value: "kvip"
                   - name: cp_enable
                     value: "true"
                   - name: svc_enable
