@@ -26,7 +26,7 @@ spec:
   fetch:
   - helmChart:
       name: metallb
-      version: "0.15.3"
+      version: "0.16.0"
       repository:
         url: https://metallb.github.io/metallb
   template:
