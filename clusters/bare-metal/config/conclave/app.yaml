@@ -38,6 +38,7 @@ stringData:
   MAIL_HOST: #@ data.values.conclave.mailHost
   MAIL_PORT: #@ data.values.conclave.mailPort
   ALLOWED_EMAILS: #@ data.values.conclave.allowedEmails
+  BGG_TOKEN: #@ data.values.conclave.bggToken
 ---
 # Classic PAT required — fine-grained tokens do not support package registry access
 apiVersion: v1
