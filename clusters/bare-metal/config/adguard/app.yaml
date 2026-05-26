@@ -199,6 +199,20 @@ spec:
               hosts:
               - adguard.home.grogscave.net
   template:
-  - ytt: {}
+  - ytt:
+      inline:
+        paths:
+          rebase-config.yaml: |
+            ---
+            apiVersion: kapp.k14s.io/v1alpha1
+            kind: Config
+            rebaseRules:
+            - path: [metadata, annotations, "metallb.io/ip-allocated-from-pool"]
+              type: copy
+              sources: [existing]
+              resourceMatchers:
+              - apiVersionKindMatcher:
+                  apiVersion: v1
+                  kind: Service
   deploy:
   - kapp: {}
