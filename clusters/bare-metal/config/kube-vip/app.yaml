@@ -68,5 +68,25 @@ spec:
             spec:
               ipAddressPools:
               - default-pool
+  - ytt:
+      inline:
+        paths:
+          rebase-config.yaml: |
+            ---
+            apiVersion: kapp.k14s.io/v1alpha1
+            kind: Config
+            rebaseRules:
+            - path: [data]
+              type: copy
+              sources: [existing]
+              resourceMatchers:
+              - kindNamespaceNameMatcher:
+                  kind: Secret
+                  namespace: metallb-system
+                  name: metallb-webhook-cert
+              - kindNamespaceNameMatcher:
+                  kind: Secret
+                  namespace: metallb-system
+                  name: frr-k8s-webhook-server-cert
   deploy:
   - kapp: {}

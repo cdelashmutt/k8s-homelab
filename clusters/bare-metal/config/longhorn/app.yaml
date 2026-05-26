@@ -111,5 +111,17 @@ spec:
             ---
             #@overlay/match by=overlay.subset({"kind": "Job", "metadata": {"name": "longhorn-uninstall"}}), expects="0+"
             #@overlay/remove
+          rebase-config.yaml: |
+            ---
+            apiVersion: kapp.k14s.io/v1alpha1
+            kind: Config
+            rebaseRules:
+            - path: [spec, syncRequestedAt]
+              type: copy
+              sources: [existing]
+              resourceMatchers:
+              - apiVersionKindMatcher:
+                  apiVersion: longhorn.io/v1beta2
+                  kind: BackupTarget
   deploy:
   - kapp: {}
