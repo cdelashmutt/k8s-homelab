@@ -51,6 +51,9 @@ data:
                       type: Gauge
                       gauge:
                         path: [status, refCount]
+    admissionWebhooks:
+      certManager:
+        enabled: true
     kubeControllerManager:
       enabled: false
     kubeScheduler:
