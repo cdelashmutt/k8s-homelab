@@ -37,6 +37,7 @@ spec:
                 force: true
                 ignoreDaemonSets: true
                 deleteEmptydirData: true
+                timeout: 300
               serviceAccountName: system-upgrade
               nodeSelector:
                 matchExpressions:
