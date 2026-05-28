@@ -150,7 +150,7 @@
                           operator: Exists
                 containers:
                 - name: kube-vip
-                  image: ghcr.io/kube-vip/kube-vip:v1.1.2
+                  image: ghcr.io/kube-vip/kube-vip:v1.2.0
                   args: [manager]
                   env:
                   - name: vip_arp
