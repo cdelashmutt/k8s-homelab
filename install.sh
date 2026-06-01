@@ -41,6 +41,6 @@ stringData:
   appMinimumSyncPeriod: 2m
 EOF
 
-kapp deploy -a sg -f https://github.com/carvel-dev/secretgen-controller/releases/download/v0.21.0/release.yml --yes
+kapp deploy -a sg -f https://github.com/carvel-dev/secretgen-controller/releases/download/v0.21.1/release.yml --yes
 
 ytt -f bootstrap --data-value clustername=$clustername | kapp deploy -a bootstrap -f- --yes
