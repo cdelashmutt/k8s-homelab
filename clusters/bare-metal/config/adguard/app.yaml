@@ -203,14 +203,6 @@ spec:
   - ytt:
       inline:
         paths:
-          namespace.yaml: |
-            ---
-            apiVersion: v1
-            kind: Namespace
-            metadata:
-              name: adguard
-              annotations:
-                kapp.k14s.io/change-group: adguard-namespace
           secretimports.yaml: |
             ---
             apiVersion: secretgen.carvel.dev/v1alpha1
@@ -218,8 +210,6 @@ spec:
             metadata:
               name: wildcard-tls
               namespace: adguard
-              annotations:
-                kapp.k14s.io/change-rule: "upsert after upserting adguard-namespace"
             spec:
               fromNamespace: cert-manager
           rebase-config.yaml: |
