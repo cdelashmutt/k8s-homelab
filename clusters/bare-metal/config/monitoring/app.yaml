@@ -137,6 +137,19 @@ spec:
             kind: Namespace
             metadata:
               name: monitoring
+              annotations:
+                kapp.k14s.io/change-group: monitoring-namespace
+          secretimports.yaml: |
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: wildcard-tls
+              namespace: monitoring
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting monitoring-namespace"
+            spec:
+              fromNamespace: cert-manager
           kapp-controller-servicemonitor.yaml: |
             ---
             apiVersion: monitoring.coreos.com/v1

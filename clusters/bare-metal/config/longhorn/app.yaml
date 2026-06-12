@@ -60,6 +60,19 @@ spec:
             kind: Namespace
             metadata:
               name: longhorn-system
+              annotations:
+                kapp.k14s.io/change-group: longhorn-namespace
+          secretimports.yaml: |
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: wildcard-tls
+              namespace: longhorn-system
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting longhorn-namespace"
+            spec:
+              fromNamespace: cert-manager
           recurring-jobs.yaml: |
             ---
             apiVersion: longhorn.io/v1beta2

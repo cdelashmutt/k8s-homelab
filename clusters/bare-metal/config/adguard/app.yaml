@@ -9,6 +9,7 @@ metadata:
     kapp.k14s.io/change-rule.0: "upsert after upserting adguard-password"
     kapp.k14s.io/change-rule.1: "upsert after upserting metallb"
     kapp.k14s.io/change-rule.2: "upsert after upserting longhorn"
+    kapp.k14s.io/change-rule.3: "upsert after upserting cert-manager"
 spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
@@ -202,6 +203,25 @@ spec:
   - ytt:
       inline:
         paths:
+          namespace.yaml: |
+            ---
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: adguard
+              annotations:
+                kapp.k14s.io/change-group: adguard-namespace
+          secretimports.yaml: |
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: wildcard-tls
+              namespace: adguard
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting adguard-namespace"
+            spec:
+              fromNamespace: cert-manager
           rebase-config.yaml: |
             ---
             apiVersion: kapp.k14s.io/v1alpha1

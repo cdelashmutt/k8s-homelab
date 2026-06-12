@@ -106,6 +106,10 @@ spec:
                   - kube-system
                   - immich
                   - paperless
+                  - monitoring
+                  - adguard
+                  - longhorn-system
+            #@yaml/text-templated-strings
             overlays/lets-encrypt.yaml: |
               ---
               apiVersion: v1
