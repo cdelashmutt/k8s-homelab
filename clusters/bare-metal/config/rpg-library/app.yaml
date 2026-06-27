@@ -1,0 +1,138 @@
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: rpg-library
+  namespace: bootstrap
+  annotations:
+    kapp.k14s.io/change-group: rpg-library
+    kapp.k14s.io/change-rule.0: "upsert after upserting rpg-library-namespace"
+    kapp.k14s.io/change-rule.1: "upsert after upserting cert-manager"
+spec:
+  serviceAccountName: bootstrap
+  syncPeriod: 10m
+  fetch:
+  - inline:
+      paths:
+        rpg-library.yaml: |
+          ---
+          apiVersion: v1
+          kind: PersistentVolume
+          metadata:
+            name: rpg-library-downloads-pv
+          spec:
+            capacity:
+              storage: 100Gi
+            accessModes:
+            - ReadOnlyMany
+            persistentVolumeReclaimPolicy: Retain
+            storageClassName: ""
+            mountOptions:
+            - nfsvers=4
+            - ro
+            nfs:
+              server: FREENAS
+              path: /mnt/main/Public/rpgtrader_downloads
+              readOnly: true
+          ---
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: rpg-library-downloads-pvc
+            namespace: rpg-library
+          spec:
+            accessModes:
+            - ReadOnlyMany
+            storageClassName: ""
+            volumeName: rpg-library-downloads-pv
+            resources:
+              requests:
+                storage: 100Gi
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: rpg-library
+            namespace: rpg-library
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: rpg-library
+            template:
+              metadata:
+                labels:
+                  app: rpg-library
+              spec:
+                containers:
+                - name: filebrowser
+                  image: filebrowser/filebrowser:latest
+                  args:
+                  - --noauth
+                  - --root=/srv
+                  - --port=80
+                  - --database=/tmp/filebrowser.db
+                  ports:
+                  - containerPort: 80
+                    name: http
+                  volumeMounts:
+                  - name: downloads
+                    mountPath: /srv
+                    readOnly: true
+                volumes:
+                - name: downloads
+                  persistentVolumeClaim:
+                    claimName: rpg-library-downloads-pvc
+                    readOnly: true
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: rpg-library
+            namespace: rpg-library
+          spec:
+            type: ClusterIP
+            selector:
+              app: rpg-library
+            ports:
+            - name: http
+              port: 80
+              targetPort: 80
+          ---
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: rpg-library
+            namespace: rpg-library
+          spec:
+            ingressClassName: traefik
+            rules:
+            - host: rpgtrader.home.grogscave.net
+              http:
+                paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: rpg-library
+                      port:
+                        number: 80
+            tls:
+            - secretName: wildcard-tls
+              hosts:
+              - rpgtrader.home.grogscave.net
+  template:
+  - ytt:
+      inline:
+        paths:
+          secretimports.yaml: |
+            ---
+            apiVersion: secretgen.carvel.dev/v1alpha1
+            kind: SecretImport
+            metadata:
+              name: wildcard-tls
+              namespace: rpg-library
+            spec:
+              fromNamespace: cert-manager
+  deploy:
+  - kapp: {}

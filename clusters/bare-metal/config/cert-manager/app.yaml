@@ -109,6 +109,7 @@ spec:
                   - monitoring
                   - adguard
                   - longhorn-system
+                  - rpg-library
             #@yaml/text-templated-strings
             overlays/lets-encrypt.yaml: |
               ---
