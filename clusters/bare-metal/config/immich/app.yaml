@@ -126,6 +126,9 @@ spec:
               storage:
                 size: 10Gi
                 storageClass: longhorn
+                metadata:
+                  annotations:
+                    recurring-job-group.longhorn.io/default: enabled
               bootstrap:
                 initdb:
                   database: immich
