@@ -37,7 +37,7 @@ spec:
                   matchNames:
                   - cert-manager
                 endpoints:
-                - port: tcp-prometheus-servicemonitor
+                - port: http-metrics
                   path: /metrics
                   interval: 60s
               ---
