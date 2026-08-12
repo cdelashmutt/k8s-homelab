@@ -1344,6 +1344,52 @@ data:
           "gridPos": { "x": 8, "y": 23, "w": 4, "h": 4 }
         },
         {
+          "id": 28,
+          "title": "Postgres Clusters Up",
+          "type": "stat",
+          "datasource": "prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "green", "value": 1 }
+                ]
+              },
+              "mappings": [],
+              "color": { "mode": "thresholds" },
+              "links": [
+                {
+                  "title": "PostgreSQL (CloudNativePG)",
+                  "url": "/d/cnpg-postgres/postgresql-cloudnativepg",
+                  "targetBlank": false
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "count(cnpg_collector_up == 1) OR vector(0)",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 16, "y": 23, "w": 4, "h": 4 }
+        },
+        {
           "id": 25,
           "title": "Harbor Registry Storage",
           "type": "stat",
