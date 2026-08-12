@@ -230,5 +230,21 @@ spec:
                   owner: paperless
                   secret:
                     name: paperless-db-credentials
+            ---
+            apiVersion: monitoring.coreos.com/v1
+            kind: PodMonitor
+            metadata:
+              name: paperless-db
+              namespace: paperless
+              labels:
+                release: monitoring
+              annotations:
+                kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
+            spec:
+              selector:
+                matchLabels:
+                  cnpg.io/cluster: paperless-db
+              podMetricsEndpoints:
+              - port: metrics
   deploy:
   - kapp: {}
