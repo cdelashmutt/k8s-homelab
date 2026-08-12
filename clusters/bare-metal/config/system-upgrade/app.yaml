@@ -30,7 +30,7 @@ spec:
               namespace: system-upgrade
             spec:
               concurrency: 1
-              channel: https://update.k3s.io/v1-release/channels/v1.34
+              channel: https://update.k3s.io/v1-release/channels/v1.35
               upgrade:
                 image: rancher/k3s-upgrade
               drain:
