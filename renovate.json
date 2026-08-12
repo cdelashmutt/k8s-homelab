@@ -8,7 +8,8 @@
       "matchStrings": ["channel: https://update\\.k3s\\.io/v1-release/channels/(?<currentValue>v[0-9]+\\.[0-9]+)"],
       "depNameTemplate": "k3s-io/k3s",
       "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<major>[0-9]+)\\.(?<minor>[0-9]+)"
+      "extractVersionTemplate": "^v(?<major>[0-9]+)\\.(?<minor>[0-9]+)",
+      "versioningTemplate": "loose"
     },
     {
       "customType": "regex",

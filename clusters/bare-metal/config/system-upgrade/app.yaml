@@ -20,8 +20,8 @@ spec:
         paths:
           plans.yaml: |
             ---
-            # Pinned to v1.32 minor channel — patch upgrades happen automatically.
-            # When Renovate opens a PR to bump this to v1.33, review release notes,
+            # Pinned to v1.34 minor channel — patch upgrades happen automatically.
+            # When Renovate opens a PR to bump this to v1.35, review release notes,
             # merge, and system-upgrade-controller rolls the upgrade node-by-node.
             apiVersion: upgrade.cattle.io/v1
             kind: Plan
@@ -42,7 +42,7 @@ spec:
               serviceAccountName: system-upgrade
               nodeSelector:
                 matchExpressions:
-                - key: k3s.io/hostname
+                - key: kubernetes.io/hostname
                   operator: Exists
   deploy:
   - kapp: {}

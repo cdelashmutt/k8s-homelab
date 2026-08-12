@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.renovatebot.com)",
+      "Bash(python3 -c \"import json; json.load\\(open\\('/home/cdelashmutt/git/k8s-homelab/renovate.json'\\)\\)\")"
+    ]
+  }
+}
