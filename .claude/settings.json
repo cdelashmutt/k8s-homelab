@@ -2,7 +2,24 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:docs.renovatebot.com)",
-      "Bash(python3 -c \"import json; json.load\\(open\\('/home/cdelashmutt/git/k8s-homelab/renovate.json'\\)\\)\")"
+      "Bash(python3 -c \"import json; json.load\\(open\\('/home/cdelashmutt/git/k8s-homelab/renovate.json'\\)\\)\")",
+      "Bash(npx --yes renovate-config-validator --version)",
+      "Bash(npx --yes --package renovate -- renovate-config-validator renovate.json)",
+      "Bash(npx --yes --package renovate -- renovate --version)",
+      "Bash(npm view *)",
+      "Bash(npx --yes --package renovate@44.24.3 -- renovate-config-validator renovate.json)",
+      "Bash(gh auth *)",
+      "Bash(RENOVATE_TOKEN=$\\(gh auth token\\) LOG_LEVEL=debug npx --yes --package renovate@44.24.3 -- renovate --platform=github --dry-run=full cdelashmutt/k8s-homelab)",
+      "Bash(tee /tmp/renovate-dryrun.log)",
+      "Bash(grep -rl \"k3s\" /home/cdelashmutt/.npm/_npx/*/node_modules/renovate/dist 2>/dev/null | head -5)",
+      "Read(//home/cdelashmutt/.npm/_npx/**)",
+      "Bash(tee /tmp/renovate-dryrun2.log)",
+      "Bash(RENOVATE_TOKEN=$\\(gh auth token\\) LOG_LEVEL=debug npx --yes --package renovate@44.24.3 -- renovate --platform=local)",
+      "Bash(tee /tmp/renovate-dryrun3.log)",
+      "Bash(awk 'NR==5101877,NR==5102300' /tmp/renovate-trace.log)",
+      "Bash(grep -v \"matchPackageNames\\\\|assignees\\\\\": \\\\[\\\\\"cdelashmutt\\\\\"\\\\]\\\\s*$\")",
+      "Bash(python3 -c ' *)",
+      "Bash(npx --yes --package renovate@44.24.3 -- renovate-config-validator /home/cdelashmutt/git/k8s-homelab/renovate.json)"
     ]
   }
 }
