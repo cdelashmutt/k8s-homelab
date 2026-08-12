@@ -18,7 +18,8 @@ metadata:
     kapp.k14s.io/change-rule: "upsert after upserting conclave-namespace"
 type: Opaque
 stringData:
-  POSTGRES_PASSWORD: #@ data.values.conclave.dbPassword
+  username: conclave
+  password: #@ data.values.conclave.dbPassword
 ---
 apiVersion: v1
 kind: Secret
