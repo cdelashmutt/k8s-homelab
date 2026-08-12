@@ -289,6 +289,105 @@
 
   tasks:
 
+    - name: Create kube-vip RBAC manifest
+      copy:
+        dest: /var/lib/rancher/k3s/server/manifests/kube-vip-rbac.yaml
+        content: |
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: kube-vip
+            namespace: kube-system
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRole
+          metadata:
+            name: system:kube-vip-role
+          rules:
+          - apiGroups: [""]
+            resources: [nodes, pods, endpoints, services, services/status, configmaps]
+            verbs: [list, get, watch, update]
+          - apiGroups: [coordination.k8s.io]
+            resources: [leases]
+            verbs: [list, get, watch, create, update, delete]
+          ---
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: system:kube-vip-binding
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: system:kube-vip-role
+          subjects:
+          - kind: ServiceAccount
+            name: kube-vip
+            namespace: kube-system
+
+    - name: Create kube-vip DaemonSet manifest
+      copy:
+        dest: /var/lib/rancher/k3s/server/manifests/kube-vip.yaml
+        content: |
+          apiVersion: apps/v1
+          kind: DaemonSet
+          metadata:
+            name: kube-vip-ds
+            namespace: kube-system
+            labels:
+              app.kubernetes.io/name: kube-vip-ds
+          spec:
+            selector:
+              matchLabels:
+                app.kubernetes.io/name: kube-vip-ds
+            template:
+              metadata:
+                labels:
+                  app.kubernetes.io/name: kube-vip-ds
+              spec:
+                affinity:
+                  nodeAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                      nodeSelectorTerms:
+                      - matchExpressions:
+                        - key: node-role.kubernetes.io/control-plane
+                          operator: Exists
+                containers:
+                - name: kube-vip
+                  image: ghcr.io/kube-vip/kube-vip:v1.2.3
+                  args: [manager]
+                  env:
+                  - name: vip_arp
+                    value: "true"
+                  - name: port
+                    value: "6443"
+                  - name: vip_interface
+                    value: "kvip"
+                  - name: cp_enable
+                    value: "true"
+                  - name: svc_enable
+                    value: "false"
+                  - name: vip_leaderelection
+                    value: "true"
+                  - name: vip_leaseduration
+                    value: "5"
+                  - name: vip_renewdeadline
+                    value: "3"
+                  - name: vip_retryperiod
+                    value: "1"
+                  - name: address
+                    value: "192.168.0.60"
+                  securityContext:
+                    capabilities:
+                      add: [NET_ADMIN, NET_RAW]
+                hostNetwork: true
+                serviceAccountName: kube-vip
+                tolerations:
+                - effect: NoSchedule
+                  operator: Exists
+                - effect: NoExecute
+                  operator: Exists
+      notify: Apply kube-vip DaemonSet manifest
+
     - name: Write k3s config to disable servicelb
       copy:
         dest: /etc/rancher/k3s/config.yaml
@@ -361,6 +460,9 @@
         -l app=longhorn-csi-plugin
         --field-selector spec.nodeName={{ ansible_hostname }}
       delegate_to: "{{ groups['k3s_init'][0] }}"
+
+    - name: Apply kube-vip DaemonSet manifest
+      command: k3s kubectl apply -f /var/lib/rancher/k3s/server/manifests/kube-vip.yaml
 
 - name: Verify cluster
   hosts: k3s_init
