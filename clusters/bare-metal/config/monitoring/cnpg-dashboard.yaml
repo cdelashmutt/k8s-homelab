@@ -14,7 +14,7 @@ data:
       "title": "PostgreSQL (CloudNativePG)",
       "uid": "cnpg-postgres",
       "schemaVersion": 38,
-      "version": 1,
+      "version": 2,
       "refresh": "1m",
       "time": { "from": "now-1h", "to": "now" },
       "timepicker": {},
@@ -312,6 +312,183 @@ data:
             }
           ],
           "gridPos": { "x": 12, "y": 15, "w": 12, "h": 8 }
+        },
+        {
+          "id": 11,
+          "title": "Query Performance (pg_stat_statements)",
+          "type": "row",
+          "collapsed": false,
+          "gridPos": { "x": 0, "y": 23, "w": 24, "h": 1 },
+          "panels": []
+        },
+        {
+          "id": 12,
+          "title": "Top Queries by Total Time",
+          "description": "Requires pg_stat_statements to be enabled on the cluster (currently only conclave-postgres has this configured)",
+          "type": "table",
+          "datasource": "prometheus",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "cnpg_pg_stat_statements_top_total_exec_time{cluster=~\"$cluster\"}",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "job": true,
+                  "instance": true,
+                  "pod": true,
+                  "namespace": true,
+                  "container": true,
+                  "endpoint": true,
+                  "service": true,
+                  "queryid": true
+                },
+                "renameByName": {
+                  "Value": "Total Time (ms)",
+                  "query": "Query",
+                  "usename": "User",
+                  "cluster": "Cluster"
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [{ "field": "Total Time (ms)", "desc": true }]
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" } } },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Total Time (ms)" }, "properties": [{ "id": "unit", "value": "ms" }, { "id": "custom.width", "value": 140 }] },
+              { "matcher": { "id": "byName", "options": "Query" }, "properties": [{ "id": "custom.width", "value": 500 }] }
+            ]
+          },
+          "options": { "showHeader": true, "cellHeight": "sm" },
+          "gridPos": { "x": 0, "y": 24, "w": 24, "h": 9 }
+        },
+        {
+          "id": 13,
+          "title": "Top Queries by Mean Time",
+          "type": "table",
+          "datasource": "prometheus",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "cnpg_pg_stat_statements_top_mean_exec_time{cluster=~\"$cluster\"}",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "job": true,
+                  "instance": true,
+                  "pod": true,
+                  "namespace": true,
+                  "container": true,
+                  "endpoint": true,
+                  "service": true,
+                  "queryid": true
+                },
+                "renameByName": {
+                  "Value": "Mean Time (ms)",
+                  "query": "Query",
+                  "usename": "User",
+                  "cluster": "Cluster"
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [{ "field": "Mean Time (ms)", "desc": true }]
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" } } },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Mean Time (ms)" }, "properties": [{ "id": "unit", "value": "ms" }, { "id": "custom.width", "value": 140 }] },
+              { "matcher": { "id": "byName", "options": "Query" }, "properties": [{ "id": "custom.width", "value": 500 }] }
+            ]
+          },
+          "options": { "showHeader": true, "cellHeight": "sm" },
+          "gridPos": { "x": 0, "y": 33, "w": 24, "h": 9 }
+        },
+        {
+          "id": 14,
+          "title": "Top Queries by Calls",
+          "type": "table",
+          "datasource": "prometheus",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "expr": "cnpg_pg_stat_statements_top_calls{cluster=~\"$cluster\"}",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "job": true,
+                  "instance": true,
+                  "pod": true,
+                  "namespace": true,
+                  "container": true,
+                  "endpoint": true,
+                  "service": true,
+                  "queryid": true
+                },
+                "renameByName": {
+                  "Value": "Calls",
+                  "query": "Query",
+                  "usename": "User",
+                  "cluster": "Cluster"
+                }
+              }
+            },
+            {
+              "id": "sortBy",
+              "options": {
+                "fields": {},
+                "sort": [{ "field": "Calls", "desc": true }]
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": { "custom": { "align": "auto", "cellOptions": { "type": "auto" } } },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Calls" }, "properties": [{ "id": "custom.width", "value": 100 }] },
+              { "matcher": { "id": "byName", "options": "Query" }, "properties": [{ "id": "custom.width", "value": 500 }] }
+            ]
+          },
+          "options": { "showHeader": true, "cellHeight": "sm" },
+          "gridPos": { "x": 0, "y": 42, "w": 24, "h": 9 }
         }
       ],
       "tags": ["homelab", "postgres", "cloudnative-pg"],
