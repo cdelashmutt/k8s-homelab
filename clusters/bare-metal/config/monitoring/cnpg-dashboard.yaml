@@ -14,7 +14,7 @@ data:
       "title": "PostgreSQL (CloudNativePG)",
       "uid": "cnpg-postgres",
       "schemaVersion": 38,
-      "version": 2,
+      "version": 3,
       "refresh": "1m",
       "time": { "from": "now-1h", "to": "now" },
       "timepicker": {},
@@ -25,7 +25,7 @@ data:
             "name": "cluster",
             "type": "query",
             "datasource": "prometheus",
-            "query": "label_values(cnpg_collector_up, cluster)",
+            "query": "label_values(cnpg_collector_up, namespace)",
             "refresh": 2,
             "includeAll": true,
             "multi": true,
@@ -74,7 +74,7 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "count(cnpg_collector_up{cluster=~\"$cluster\"} == 1) OR vector(0)",
+              "expr": "count(cnpg_collector_up{namespace=~\"$cluster\"} == 1) OR vector(0)",
               "instant": true,
               "refId": "A"
             }
@@ -113,7 +113,7 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "sum(rate(cnpg_pg_stat_database_blks_hit{cluster=~\"$cluster\"}[5m])) / (sum(rate(cnpg_pg_stat_database_blks_hit{cluster=~\"$cluster\"}[5m])) + sum(rate(cnpg_pg_stat_database_blks_read{cluster=~\"$cluster\"}[5m]))) * 100",
+              "expr": "sum(rate(cnpg_pg_stat_database_blks_hit{namespace=~\"$cluster\"}[5m])) / (sum(rate(cnpg_pg_stat_database_blks_hit{namespace=~\"$cluster\"}[5m])) + sum(rate(cnpg_pg_stat_database_blks_read{namespace=~\"$cluster\"}[5m]))) * 100",
               "instant": true,
               "refId": "A"
             }
@@ -159,9 +159,9 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "cnpg_collector_up{cluster=~\"$cluster\"}",
+              "expr": "cnpg_collector_up{namespace=~\"$cluster\"}",
               "instant": true,
-              "legendFormat": "{{cluster}}",
+              "legendFormat": "{{namespace}}",
               "refId": "A"
             }
           ],
@@ -199,8 +199,8 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "sum by (cluster, state) (cnpg_backends_total{cluster=~\"$cluster\"})",
-              "legendFormat": "{{cluster}} - {{state}}",
+              "expr": "sum by (namespace, state) (cnpg_backends_total{namespace=~\"$cluster\"})",
+              "legendFormat": "{{namespace}} - {{state}}",
               "refId": "A"
             }
           ],
@@ -230,14 +230,14 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "sum by (cluster) (rate(cnpg_pg_stat_database_xact_commit{cluster=~\"$cluster\"}[5m]))",
-              "legendFormat": "{{cluster}} - commit",
+              "expr": "sum by (namespace) (rate(cnpg_pg_stat_database_xact_commit{namespace=~\"$cluster\"}[5m]))",
+              "legendFormat": "{{namespace}} - commit",
               "refId": "A"
             },
             {
               "datasource": "prometheus",
-              "expr": "sum by (cluster) (rate(cnpg_pg_stat_database_xact_rollback{cluster=~\"$cluster\"}[5m]))",
-              "legendFormat": "{{cluster}} - rollback",
+              "expr": "sum by (namespace) (rate(cnpg_pg_stat_database_xact_rollback{namespace=~\"$cluster\"}[5m]))",
+              "legendFormat": "{{namespace}} - rollback",
               "refId": "B"
             }
           ],
@@ -275,8 +275,8 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "cnpg_pg_database_size_bytes{cluster=~\"$cluster\"}",
-              "legendFormat": "{{cluster}} - {{datname}}",
+              "expr": "cnpg_pg_database_size_bytes{namespace=~\"$cluster\"}",
+              "legendFormat": "{{namespace}} - {{datname}}",
               "refId": "A"
             }
           ],
@@ -306,8 +306,8 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "cnpg_collector_pg_wal{cluster=~\"$cluster\", value=\"size\"}",
-              "legendFormat": "{{cluster}}",
+              "expr": "cnpg_collector_pg_wal{namespace=~\"$cluster\", value=\"size\"}",
+              "legendFormat": "{{namespace}}",
               "refId": "A"
             }
           ],
@@ -330,7 +330,7 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "cnpg_pg_stat_statements_top_total_exec_time{cluster=~\"$cluster\"}",
+              "expr": "cnpg_pg_stat_statements_top_total_exec_time{namespace=~\"$cluster\"}",
               "format": "table",
               "instant": true,
               "refId": "A"
@@ -346,7 +346,6 @@ data:
                   "job": true,
                   "instance": true,
                   "pod": true,
-                  "namespace": true,
                   "container": true,
                   "endpoint": true,
                   "service": true,
@@ -356,7 +355,7 @@ data:
                   "Value": "Total Time (ms)",
                   "query": "Query",
                   "usename": "User",
-                  "cluster": "Cluster"
+                  "namespace": "Cluster"
                 }
               }
             },
@@ -386,7 +385,7 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "cnpg_pg_stat_statements_top_mean_exec_time{cluster=~\"$cluster\"}",
+              "expr": "cnpg_pg_stat_statements_top_mean_exec_time{namespace=~\"$cluster\"}",
               "format": "table",
               "instant": true,
               "refId": "A"
@@ -402,7 +401,6 @@ data:
                   "job": true,
                   "instance": true,
                   "pod": true,
-                  "namespace": true,
                   "container": true,
                   "endpoint": true,
                   "service": true,
@@ -412,7 +410,7 @@ data:
                   "Value": "Mean Time (ms)",
                   "query": "Query",
                   "usename": "User",
-                  "cluster": "Cluster"
+                  "namespace": "Cluster"
                 }
               }
             },
@@ -442,7 +440,7 @@ data:
           "targets": [
             {
               "datasource": "prometheus",
-              "expr": "cnpg_pg_stat_statements_top_calls{cluster=~\"$cluster\"}",
+              "expr": "cnpg_pg_stat_statements_top_calls{namespace=~\"$cluster\"}",
               "format": "table",
               "instant": true,
               "refId": "A"
@@ -458,7 +456,6 @@ data:
                   "job": true,
                   "instance": true,
                   "pod": true,
-                  "namespace": true,
                   "container": true,
                   "endpoint": true,
                   "service": true,
@@ -468,7 +465,7 @@ data:
                   "Value": "Calls",
                   "query": "Query",
                   "usename": "User",
-                  "cluster": "Cluster"
+                  "namespace": "Cluster"
                 }
               }
             },
