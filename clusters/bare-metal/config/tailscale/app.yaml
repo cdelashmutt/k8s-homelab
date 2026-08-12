@@ -31,7 +31,7 @@ spec:
   fetch:
   - helmChart:
       name: tailscale-operator
-      version: "1.98.9"
+      version: "1.102.2"
       repository:
         url: https://pkgs.tailscale.com/helmcharts
   template:
