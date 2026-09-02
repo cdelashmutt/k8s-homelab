@@ -16,7 +16,7 @@ spec:
   fetch:
   - helmChart:
       name: paperless
-      version: "11.5.0"
+      version: "11.7.0"
       repository:
         url: https://zekker6.github.io/helm-charts
   template:
