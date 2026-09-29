@@ -73,8 +73,6 @@ spec:
             kind: PersistentVolume
             metadata:
               name: paperless-consume-pv
-              annotations:
-                kapp.k14s.io/update-strategy: skip
             spec:
               capacity:
                 storage: 10Gi
@@ -95,7 +93,6 @@ spec:
               namespace: paperless
               annotations:
                 kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
-                kapp.k14s.io/update-strategy: skip
             spec:
               accessModes:
               - ReadWriteMany
@@ -109,8 +106,6 @@ spec:
             kind: PersistentVolume
             metadata:
               name: paperless-media-pv
-              annotations:
-                kapp.k14s.io/update-strategy: skip
             spec:
               capacity:
                 storage: 40Gi
@@ -131,7 +126,6 @@ spec:
               namespace: paperless
               annotations:
                 kapp.k14s.io/change-rule: "upsert after upserting paperless-namespace"
-                kapp.k14s.io/update-strategy: skip
             spec:
               accessModes:
               - ReadWriteMany
@@ -246,5 +240,19 @@ spec:
                   cnpg.io/cluster: paperless-db
               podMetricsEndpoints:
               - port: metrics
+          rebase-config.yaml: |
+            ---
+            apiVersion: kapp.k14s.io/v1alpha1
+            kind: Config
+            rebaseRules:
+            #! Fields the PV controller fills in when it binds a PV to its PVC.
+            - paths:
+              - [spec, claimRef]
+              - [spec, volumeMode]
+              - [metadata, annotations, pv.kubernetes.io/bound-by-controller]
+              type: copy
+              sources: [existing, new]
+              resourceMatchers:
+              - apiVersionKindMatcher: {apiVersion: v1, kind: PersistentVolume}
   deploy:
   - kapp: {}

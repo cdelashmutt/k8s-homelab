@@ -77,8 +77,6 @@ spec:
             kind: PersistentVolume
             metadata:
               name: immich-library-pv
-              annotations:
-                kapp.k14s.io/update-strategy: skip
             spec:
               capacity:
                 storage: 500Gi
@@ -99,7 +97,6 @@ spec:
               namespace: immich
               annotations:
                 kapp.k14s.io/change-rule: "upsert after upserting immich-namespace"
-                kapp.k14s.io/update-strategy: skip
             spec:
               accessModes:
               - ReadWriteMany
@@ -157,5 +154,19 @@ spec:
                   cnpg.io/cluster: immich-db
               podMetricsEndpoints:
               - port: metrics
+          rebase-config.yaml: |
+            ---
+            apiVersion: kapp.k14s.io/v1alpha1
+            kind: Config
+            rebaseRules:
+            #! Fields the PV controller fills in when it binds a PV to its PVC.
+            - paths:
+              - [spec, claimRef]
+              - [spec, volumeMode]
+              - [metadata, annotations, pv.kubernetes.io/bound-by-controller]
+              type: copy
+              sources: [existing, new]
+              resourceMatchers:
+              - apiVersionKindMatcher: {apiVersion: v1, kind: PersistentVolume}
   deploy:
   - kapp: {}

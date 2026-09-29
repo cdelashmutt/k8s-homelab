@@ -20,15 +20,12 @@ spec:
           kind: PersistentVolume
           metadata:
             name: rpg-library-downloads-pv
-            annotations:
-              kapp.k14s.io/update-strategy: skip
           spec:
             capacity:
               storage: 100Gi
             accessModes:
             - ReadOnlyMany
             persistentVolumeReclaimPolicy: Retain
-            storageClassName: ""
             mountOptions:
             - nfsvers=4
             - ro
@@ -136,5 +133,19 @@ spec:
               namespace: rpg-library
             spec:
               fromNamespace: cert-manager
+          rebase-config.yaml: |
+            ---
+            apiVersion: kapp.k14s.io/v1alpha1
+            kind: Config
+            rebaseRules:
+            #! Fields the PV controller fills in when it binds a PV to its PVC.
+            - paths:
+              - [spec, claimRef]
+              - [spec, volumeMode]
+              - [metadata, annotations, pv.kubernetes.io/bound-by-controller]
+              type: copy
+              sources: [existing, new]
+              resourceMatchers:
+              - apiVersionKindMatcher: {apiVersion: v1, kind: PersistentVolume}
   deploy:
   - kapp: {}
