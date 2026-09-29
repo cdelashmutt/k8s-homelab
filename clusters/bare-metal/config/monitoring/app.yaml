@@ -73,6 +73,7 @@ data:
           - prometheus.home.grogscave.net
       prometheusSpec:
         retention: 15d
+        retentionSize: 15GB
         storageSpec:
           volumeClaimTemplate:
             spec:
