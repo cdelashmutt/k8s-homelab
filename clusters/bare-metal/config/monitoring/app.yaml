@@ -172,6 +172,17 @@ spec:
             #@ load("@ytt:overlay", "overlay")
             #@overlay/match by=overlay.subset({"metadata": {"annotations": {"helm.sh/hook": "test"}}}), expects="0+"
             #@overlay/remove
+          skip-token-secret-update.yaml: |
+            #@ load("@ytt:overlay", "overlay")
+            #! The token controller populates this SA-token Secret; kapp re-applying it every
+            #! sync wipes the token briefly and the operator rejects the ServiceMonitors.
+            #@overlay/match by=overlay.subset({"kind": "Secret", "metadata": {"name": "monitoring-kube-prometheus-prometheus-token"}})
+            ---
+            metadata:
+              #@overlay/match missing_ok=True
+              annotations:
+                #@overlay/match missing_ok=True
+                kapp.k14s.io/update-strategy: skip
           disable-label-scoping.yaml: |
             #@ load("@ytt:overlay", "overlay")
             #@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "monitoring-kube-prometheus-prometheus"}})
