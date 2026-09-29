@@ -185,17 +185,17 @@ spec:
               - apiVersionKindMatcher:
                   apiVersion: apiextensions.k8s.io/v1
                   kind: CustomResourceDefinition
-          skip-token-secret-update.yaml: |
-            #@ load("@ytt:overlay", "overlay")
-            #! The token controller populates this SA-token Secret; kapp re-applying it every
-            #! sync wipes the token briefly and the operator rejects the ServiceMonitors.
-            #@overlay/match by=overlay.subset({"kind": "Secret", "metadata": {"name": "monitoring-kube-prometheus-prometheus-token"}})
-            ---
-            metadata:
-              #@overlay/match missing_ok=True
-              annotations:
-                #@overlay/match missing_ok=True
-                kapp.k14s.io/update-strategy: skip
+            #! The token controller fills in this SA-token Secret; without this kapp strips its
+            #! data every sync and the operator briefly rejects the ServiceMonitors that use it.
+            - paths:
+              - [data]
+              - [metadata, annotations, kubernetes.io/service-account.uid]
+              - [metadata, labels, kubernetes.io/legacy-token-last-used]
+              type: copy
+              sources: [existing]
+              resourceMatchers:
+              - apiVersionKindMatcher: {apiVersion: v1, kind: Secret}
+              - hasAnnotationMatcher: {keys: [kubernetes.io/service-account.name]}
           disable-label-scoping.yaml: |
             #@ load("@ytt:overlay", "overlay")
             #@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"name": "monitoring-kube-prometheus-prometheus"}})
