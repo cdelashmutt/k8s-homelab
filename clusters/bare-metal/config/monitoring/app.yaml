@@ -172,6 +172,19 @@ spec:
             #@ load("@ytt:overlay", "overlay")
             #@overlay/match by=overlay.subset({"metadata": {"annotations": {"helm.sh/hook": "test"}}}), expects="0+"
             #@overlay/remove
+          rebase-config.yaml: |
+            ---
+            apiVersion: kapp.k14s.io/v1alpha1
+            kind: Config
+            rebaseRules:
+            #! The API server defaults spec.conversion.strategy to None, which the chart's CRDs omit.
+            - path: [spec, conversion]
+              type: copy
+              sources: [new, existing]
+              resourceMatchers:
+              - apiVersionKindMatcher:
+                  apiVersion: apiextensions.k8s.io/v1
+                  kind: CustomResourceDefinition
           skip-token-secret-update.yaml: |
             #@ load("@ytt:overlay", "overlay")
             #! The token controller populates this SA-token Secret; kapp re-applying it every

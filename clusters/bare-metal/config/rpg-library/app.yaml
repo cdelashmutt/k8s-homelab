@@ -20,6 +20,8 @@ spec:
           kind: PersistentVolume
           metadata:
             name: rpg-library-downloads-pv
+            annotations:
+              kapp.k14s.io/update-strategy: skip
           spec:
             capacity:
               storage: 100Gi

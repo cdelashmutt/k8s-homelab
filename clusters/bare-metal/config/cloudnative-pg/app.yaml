@@ -45,6 +45,19 @@ spec:
             kind: Namespace
             metadata:
               name: cnpg-system
+          rebase-config.yaml: |
+            ---
+            apiVersion: kapp.k14s.io/v1alpha1
+            kind: Config
+            rebaseRules:
+            #! The API server defaults spec.conversion.strategy to None, which the chart's CRDs omit.
+            - path: [spec, conversion]
+              type: copy
+              sources: [new, existing]
+              resourceMatchers:
+              - apiVersionKindMatcher:
+                  apiVersion: apiextensions.k8s.io/v1
+                  kind: CustomResourceDefinition
           disable-label-scoping.yaml: |
             #@ load("@ytt:overlay", "overlay")
             #@overlay/match by=overlay.subset({"kind": "Service", "metadata": {"namespace": "cnpg-system"}}), expects="0+"
