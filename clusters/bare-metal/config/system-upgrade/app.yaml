@@ -38,7 +38,7 @@ spec:
                 ignoreDaemonSets: true
                 deleteEmptydirData: true
                 disableEviction: true
-                timeout: 300
+                timeout: 5m
               serviceAccountName: system-upgrade
               nodeSelector:
                 matchExpressions:
