@@ -13,7 +13,9 @@ spec:
   - name: longhorn
     rules:
     - alert: LonghornVolumeBackupStale
-      expr: (time() - longhorn_volume_last_backup_at) / 86400 > 8
+      # Excluded: Prometheus TSDB volume (monitoring/prometheus-...-db) is intentionally
+      # opted out of recurring jobs (no-jobs label), so it is never backed up.
+      expr: (time() - longhorn_volume_last_backup_at{volume!="pvc-c05483e3-ea32-471e-a35b-987bd18540d5"}) / 86400 > 8
       for: 1h
       labels:
         severity: warning
