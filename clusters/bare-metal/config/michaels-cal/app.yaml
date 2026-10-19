@@ -136,6 +136,17 @@ spec:
             tls:
               - hosts:
                   - michaels-cal
+            ---
+            apiVersion: externaldns.k8s.io/v1alpha1
+            kind: DNSEndpoint
+            metadata:
+              name: michaels-cal
+              namespace: michaels-cal
+            spec:
+              endpoints:
+                - dnsName: michaels-cal.home.grogscave.net
+                  recordType: CNAME
+                  targets: ["michaels-cal.tail272c02.ts.net"]
   template:
   - ytt: {}
   deploy:

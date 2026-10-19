@@ -12,6 +12,10 @@ spec:
   serviceAccountName: bootstrap
   syncPeriod: 10m
   fetch:
+  - http:
+      url: https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.23.0/charts/external-dns/crds/dnsendpoints.externaldns.k8s.io.yaml
+  - http:
+      url: https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.23.0/charts/external-dns/crds/dnsrecords.externaldns.k8s.io.yaml
   - inline:
       paths:
         rbac.yaml: |
@@ -81,6 +85,7 @@ spec:
                 - name: external-dns
                   image: registry.k8s.io/external-dns/external-dns:v0.23.0
                   args:
+                  - --source=crd
                   - --source=service
                   - --domain-filter=home.grogscave.net
                   - --service-type-filter=LoadBalancer
